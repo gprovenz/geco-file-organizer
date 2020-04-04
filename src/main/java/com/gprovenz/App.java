@@ -5,8 +5,10 @@ import com.gprovenz.photoor.reader.PathBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configuration;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,6 +27,7 @@ public class App
 
     public static void main(String[] args ) throws IOException {
 
+
         //String sourcePath = "C:\\Users\\Gas\\Documents\\Dati\\Foto";
 
         String sourcePath = "C:\\Users\\Gas\\Pictures";
@@ -32,7 +35,7 @@ public class App
         String destinationPath = "C:\\Users\\Gas\\Pictures";
 
         File testDir = new File (destinationPath);
-        System.out.println(String.format("Searching files..."));
+        logger.info("Searching files...");
 
         Files.walk(Paths.get(sourcePath))
                 .sorted(Comparator.reverseOrder())
@@ -40,7 +43,7 @@ public class App
                 .filter(f->f.isFile())
                 .forEach(e->moveFile(e, testDir));
 
-        System.out.println(String.format("Removing empty folders..."));
+        logger.info("Removing empty folders...");
 
         // remove empty dirs
         Files.walk(Paths.get(sourcePath))
@@ -50,7 +53,7 @@ public class App
                 .forEach(e->deleteEmptyDir(e));
 
 
-        System.out.println(String.format("Moved %s files successfully", moved));
+        logger.info("Moved {} files successfully", moved);
     }
 
     private static boolean moveFile(File sourceFile, File destinationPath) {
@@ -58,25 +61,53 @@ public class App
         try {
             fileInfo = FileInfo.getInstance(sourceFile);
         } catch (IOException e) {
-            logger.error("Cannot read file %s", sourceFile.getAbsolutePath());
+            logger.error("Cannot read file {}", sourceFile.getAbsolutePath());
             return false;
         }
-        File dest = PathBuilder.buildDestPath(destinationPath, fileInfo);
-        if (!dest.exists()) {
-            new File(dest.getParent()).mkdirs();
-            try {
-                FileUtils.moveFile(sourceFile, dest);
-            } catch (IOException e) {
-                logger.error("Cannot move file %s", sourceFile.getAbsolutePath());
-                return false;
-            }
-            System.out.println(String.format("File %s moved to %s", sourceFile.getName(), dest.getAbsolutePath()));
-            moved++;
-            return true;
+        File destFile = PathBuilder.buildDestPath(destinationPath, fileInfo);
+
+        if (sourceFile.equals(destFile)) {
+            logger.info("Skipping moving same file {} ->  {}", sourceFile.getAbsolutePath(), destFile.getAbsolutePath());
+            return false;
         }
 
-        System.out.println(String.format("File %s already exists in path %s", sourceFile.getName(), dest.getAbsolutePath()));
+        if (!destFile.exists()) {
+            new File(destFile.getParent()).mkdirs();
+            try {
+                FileUtils.moveFile(sourceFile, destFile);
+            } catch (IOException e) {
+                logger.error("Cannot move file {}", sourceFile.getAbsolutePath());
+                return false;
+            }
+            logger.info("File {} moved to {}", sourceFile.getName(), destFile.getAbsolutePath());
+            moved++;
+            return true;
+        } else {
+            try {
+                if (sameContent(sourceFile, destFile)) {
+                    logger.info("File {} already exists in path {}", sourceFile.getName(), destFile.getAbsolutePath());
+                    sourceFile.delete();
+                } else {
+                    logger.warn("File {} already exists in path {}, but it has different content", sourceFile.getName(), destFile.getAbsolutePath());
+                }
+            } catch (IOException e) {
+                logger.error("Cannot delete source file {}", sourceFile.getAbsolutePath());
+            }
+        }
+
+
         return false;
+    }
+
+    private static boolean sameContent(File sourceFile, File destFile) throws IOException {
+        FileInfo source = FileInfo.getInstance(sourceFile);
+        FileInfo dest = FileInfo.getInstance(destFile);
+        if(source.equals(dest)) {
+            // they seem the same file. Checking for content:
+            return FileUtils.contentEquals(sourceFile, destFile);
+        } else {
+            return false;
+        }
     }
 
     private static boolean deleteEmptyDir(File f) {

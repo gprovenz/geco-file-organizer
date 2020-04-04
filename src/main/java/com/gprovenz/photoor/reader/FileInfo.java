@@ -87,7 +87,7 @@ public class FileInfo {
                     fi.hasExif = true;
                 }
             } catch (ImageProcessingException e) {
-                logger.warn("Error reading EXIF metadata from file " + file.getAbsolutePath());
+                logger.warn("Error reading EXIF metadata from file {}", file.getAbsolutePath());
             }
         }
 
