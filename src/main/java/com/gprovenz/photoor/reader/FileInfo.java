@@ -26,7 +26,9 @@ public class FileInfo {
     private String fileName;
     private long size;
     private Date creationDate;
+    private Date lastModifiedDate;
     private MediaType mediaType;
+    private boolean hasExif;
 
     private FileInfo() { }
 
@@ -47,6 +49,8 @@ public class FileInfo {
                 fi.creationDate = readCreationDateFromExifMetadata(file);
                 if (fi.creationDate == null) {
                     logger.info("EXIF metadata not fond for file '{}'", file.getAbsolutePath());
+                } else {
+                    fi.hasExif = true;
                 }
             } catch (ImageProcessingException e) {
                 logger.warn("Error reading EXIF metadata from file " + file.getAbsolutePath());
@@ -59,6 +63,8 @@ public class FileInfo {
         if (fi.creationDate==null) {
             fi.creationDate = new Date(attr.creationTime().toMillis());
         }
+
+        fi.lastModifiedDate = new Date(attr.lastModifiedTime().toMillis());
         return fi;
     }
 
@@ -102,29 +108,37 @@ public class FileInfo {
         return mediaType;
     }
 
+    public boolean hasExifMetadata() {
+        return hasExif;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof FileInfo)) return false;
         FileInfo fileInfo = (FileInfo) o;
         return size == fileInfo.size &&
+                hasExif == fileInfo.hasExif &&
                 fileName.equals(fileInfo.fileName) &&
                 creationDate.equals(fileInfo.creationDate) &&
+                lastModifiedDate.equals(fileInfo.lastModifiedDate) &&
                 mediaType == fileInfo.mediaType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fileName, size, creationDate, mediaType);
+        return Objects.hash(fileName, size, creationDate, lastModifiedDate, mediaType, hasExif);
     }
 
     @Override
     public String toString() {
         return "FileInfo {" +
-                "\n fileName = '    " + fileName + '\'' +
-                "\n size =          " + size +
-                "\n creationDate =  " + creationDate +
-                "\n mediaType =     " + mediaType +
-                '}';
+                "\n fileName =          " + fileName +
+                "\n size =              " + size +
+                "\n creationDate =      " + creationDate +
+                "\n lastModifiedDate =  " + lastModifiedDate +
+                "\n mediaType =         " + mediaType +
+                "\n EXIF metadata =     " + hasExif +
+                "\n}";
     }
 }
