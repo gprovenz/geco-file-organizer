@@ -13,14 +13,17 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
 
 public class FileInfo {
     private static Logger logger = LogManager.getLogger();
 
-    private static final String[] PICTURE_EXTS = new String[] {".jpg", ".jpeg"};
-    private static final String[] VIDEO_EXTS = new String[] {".mpg", ".mpeg", ".mkv", ".mp4", ".avi", ".vid"};
+    private static final String[] PICTURE_EXTS = new String[] {
+            "jpg", "jpeg", "raw", "cr2", "gif", "bmp", "psd", "tiff", "tif", "png"};
+    private static final String[] VIDEO_EXTS = new String[] {
+            "mpg", "mpeg", "mkv", "mp4", "avi", "vid", "mov"};
 
     public enum MediaType { PICTURE, VIDEO, OTHER }
     private String fileName;
@@ -32,6 +35,31 @@ public class FileInfo {
 
     private FileInfo() { }
 
+    private static boolean isValidDate(Date d) {
+        if (d==null) {
+            return false;
+        }
+        Calendar c = Calendar.getInstance();
+        c.setTime(d);
+        return c.get(Calendar.YEAR) > 1970;
+    }
+
+    private static Date getMinValidDate(Date d1, Date d2) {
+        if (isValidDate(d1) && d1.before(d2)) {
+            return d1;
+        }
+        if (isValidDate(d2) && d2.before(d1)) {
+            return d2;
+        }
+        if (isValidDate(d1)) {
+            return d1;
+        }
+        if (isValidDate(d2)) {
+            return d2;
+        }
+        return new Date();
+    }
+
     public static FileInfo getInstance(File file) throws IOException {
         if (!file.isFile()) {
             throw new IllegalArgumentException("Invalid file " + file.getAbsolutePath());
@@ -40,16 +68,22 @@ public class FileInfo {
             throw new FileNotFoundException("File not found: " + file.getAbsolutePath());
         }
         FileInfo fi = new FileInfo();
-
+        BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+        fi.size = attr.size();
         fi.fileName = file.getName();
         fi.mediaType = detectMediaType(file);
+        fi.creationDate = new Date(attr.creationTime().toMillis());
+        fi.lastModifiedDate = new Date(attr.lastModifiedTime().toMillis());
+
+        fi.creationDate = getMinValidDate(fi.creationDate, fi.lastModifiedDate);
 
         if (fi.mediaType == MediaType.PICTURE) {
             try {
-                fi.creationDate = readCreationDateFromExifMetadata(file);
-                if (fi.creationDate == null) {
-                    logger.info("EXIF metadata not fond for file '{}'", file.getAbsolutePath());
+                Date exifDate = readCreationDateFromExifMetadata(file);
+                if (exifDate == null) {
+                    logger.debug("EXIF metadata not fond for file '{}'", file.getAbsolutePath());
                 } else {
+                    fi.creationDate = getMinValidDate(fi.creationDate, exifDate);
                     fi.hasExif = true;
                 }
             } catch (ImageProcessingException e) {
@@ -57,27 +91,19 @@ public class FileInfo {
             }
         }
 
-        BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
-        fi.size = attr.size();
-
-        if (fi.creationDate==null) {
-            fi.creationDate = new Date(attr.creationTime().toMillis());
-        }
-
-        fi.lastModifiedDate = new Date(attr.lastModifiedTime().toMillis());
         return fi;
     }
 
     private static MediaType detectMediaType(File file) {
         final String fileName = file.getName().toLowerCase();
         for (String ext:PICTURE_EXTS) {
-            if (fileName.endsWith(ext)) {
+            if (fileName.endsWith("." + ext)) {
                 return MediaType.PICTURE;
             }
         }
         for (String ext:VIDEO_EXTS) {
-            if (fileName.endsWith(ext)) {
-                return MediaType.PICTURE;
+            if (fileName.endsWith("." + ext)) {
+                return MediaType.VIDEO;
             }
         }
         return MediaType.OTHER;
@@ -96,20 +122,12 @@ public class FileInfo {
         return fileName;
     }
 
-    public long getSize() {
-        return size;
-    }
-
     public Date getCreationDate() {
         return creationDate;
     }
 
     public MediaType getMediaType() {
         return mediaType;
-    }
-
-    public boolean hasExifMetadata() {
-        return hasExif;
     }
 
     @Override
