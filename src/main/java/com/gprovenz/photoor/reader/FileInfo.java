@@ -23,7 +23,7 @@ public class FileInfo {
     private static final String[] PICTURE_EXTS = new String[] {
             "jpg", "jpeg", "raw", "cr2", "gif", "bmp", "psd", "tiff", "tif", "png"};
     private static final String[] VIDEO_EXTS = new String[] {
-            "mpg", "mpeg", "mkv", "mp4", "avi", "vid", "mov"};
+            "mpg", "mpeg", "mkv", "mp4", "avi", "vid", "mov", "3gp"};
 
     public enum MediaType { PICTURE, VIDEO, OTHER }
     private String fileName;
@@ -140,6 +140,13 @@ public class FileInfo {
                 fileName.equals(fileInfo.fileName) &&
                 creationDate.equals(fileInfo.creationDate) &&
                 lastModifiedDate.equals(fileInfo.lastModifiedDate) &&
+                mediaType == fileInfo.mediaType;
+    }
+
+    public boolean potentiallySameFile(FileInfo fileInfo) {
+        return size == fileInfo.size &&
+                hasExif == fileInfo.hasExif &&
+                fileName.equalsIgnoreCase(fileInfo.fileName) &&
                 mediaType == fileInfo.mediaType;
     }
 

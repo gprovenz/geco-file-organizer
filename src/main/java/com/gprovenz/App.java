@@ -14,6 +14,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Hello world!
@@ -30,33 +32,43 @@ public class App
 
         //String sourcePath = "C:\\Users\\Gas\\Documents\\Dati\\Foto";
 
-        String sourcePath = "C:\\Users\\Gas\\Pictures";
+        String sourcePath = "D:\\Foto\\new";
 
-        String destinationPath = "C:\\Users\\Gas\\Pictures";
+        String destinationPath = "D:\\Foto";
 
-        File testDir = new File (destinationPath);
+        moveAllFiles(sourcePath, destinationPath, false);
+    }
+
+    private static void moveAllFiles(String sourcePath, String destinationPath, boolean deleteEmptyFolders) throws IOException {
+
+        ExecutorService executor = Executors.newFixedThreadPool(8);
+
+        File outPath = new File (destinationPath);
         logger.info("Searching files...");
 
         Files.walk(Paths.get(sourcePath))
                 .sorted(Comparator.reverseOrder())
                 .map(Path::toFile)
                 .filter(f->f.isFile())
-                .forEach(e->moveFile(e, testDir));
+                .forEach(e->moveFile(e, outPath, executor));
 
-        logger.info("Removing empty folders...");
+        executor.shutdown();
 
-        // remove empty dirs
-        Files.walk(Paths.get(sourcePath))
-                .sorted(Comparator.reverseOrder())
-                .map(Path::toFile)
-                .filter(f->f.isDirectory())
-                .forEach(e->deleteEmptyDir(e));
+        if (deleteEmptyFolders) {
+            logger.info("Removing empty folders...");
 
+            // remove empty dirs
+            Files.walk(Paths.get(sourcePath))
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .filter(f -> f.isDirectory())
+                    .forEach(e -> deleteEmptyDir(e));
+        }
 
         logger.info("Moved {} files successfully", moved);
     }
 
-    private static boolean moveFile(File sourceFile, File destinationPath) {
+    private static boolean moveFile(File sourceFile, File destinationPath, ExecutorService executor) {
         FileInfo fileInfo;
         try {
             fileInfo = FileInfo.getInstance(sourceFile);
@@ -67,7 +79,7 @@ public class App
         File destFile = PathBuilder.buildDestPath(destinationPath, fileInfo);
 
         if (sourceFile.equals(destFile)) {
-            logger.info("Skipping moving same file {} ->  {}", sourceFile.getAbsolutePath(), destFile.getAbsolutePath());
+            logger.debug("Skipping moving same file {} -> {}", sourceFile.getAbsolutePath(), destFile.getAbsolutePath());
             return false;
         }
 
@@ -83,18 +95,19 @@ public class App
             moved++;
             return true;
         } else {
-            try {
-                if (sameContent(sourceFile, destFile)) {
-                    logger.info("File {} already exists in path {}", sourceFile.getName(), destFile.getAbsolutePath());
-                    sourceFile.delete();
-                } else {
-                    logger.warn("File {} already exists in path {}, but it has different content", sourceFile.getName(), destFile.getAbsolutePath());
+            executor.submit(() -> {
+                try {
+                    if (sameContent(sourceFile, destFile)) {
+                        logger.info("File {} already exists in path {}", sourceFile.getName(), destFile.getAbsolutePath());
+                        sourceFile.delete();
+                    } else {
+                        logger.warn("File {} already exists in path {}, but it has different content", sourceFile.getName(), destFile.getAbsolutePath());
+                    }
+                } catch (IOException e) {
+                    logger.error("Cannot delete source file {}", sourceFile.getAbsolutePath());
                 }
-            } catch (IOException e) {
-                logger.error("Cannot delete source file {}", sourceFile.getAbsolutePath());
-            }
+            });
         }
-
 
         return false;
     }
@@ -102,7 +115,7 @@ public class App
     private static boolean sameContent(File sourceFile, File destFile) throws IOException {
         FileInfo source = FileInfo.getInstance(sourceFile);
         FileInfo dest = FileInfo.getInstance(destFile);
-        if(source.equals(dest)) {
+        if(source.potentiallySameFile(dest)) {
             // they seem the same file. Checking for content:
             return FileUtils.contentEquals(sourceFile, destFile);
         } else {
