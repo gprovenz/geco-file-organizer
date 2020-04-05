@@ -5,10 +5,8 @@ import com.gprovenz.photoor.reader.PathBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.config.Configuration;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,51 +19,73 @@ import java.util.concurrent.Executors;
  * Hello world!
  *
  */
-public class App 
+public class App
 {
+    public static final int THREADS = 4;
     private static Logger logger = LogManager.getLogger();
 
     private static int moved = 0;
+    private static int copied = 0;
 
-    public static void main(String[] args ) throws IOException {
+    public static void main(String[] args ) throws IOException, InterruptedException {
 
 
         //String sourcePath = "C:\\Users\\Gas\\Documents\\Dati\\Foto";
 
-        String sourcePath = "D:\\Foto\\new";
+        String sourcePath = "D:\\video\\2020";
 
-        String destinationPath = "D:\\Foto";
+        String destinationPath = "F:\\";
 
-        moveAllFiles(sourcePath, destinationPath, false);
+        // moveAllFiles(sourcePath, destinationPath, false);
+        copyAllFiles(sourcePath, destinationPath);
     }
 
-    private static void moveAllFiles(String sourcePath, String destinationPath, boolean deleteEmptyFolders) throws IOException {
+    private static void moveAllFiles(String sourcePath, String destinationPath, boolean deleteEmptyFolders) throws IOException, InterruptedException {
+        moved = 0;
 
-        ExecutorService executor = Executors.newFixedThreadPool(8);
+       ExecutorService executor = Executors.newFixedThreadPool(THREADS);
 
         File outPath = new File (destinationPath);
-        logger.info("Searching files...");
+        logger.info("Moving files...");
 
         Files.walk(Paths.get(sourcePath))
-                .sorted(Comparator.reverseOrder())
                 .map(Path::toFile)
-                .filter(f->f.isFile())
-                .forEach(e->moveFile(e, outPath, executor));
+                .filter(f -> f.isFile())
+                .forEach(f -> moveFile(f, outPath, executor));
 
         executor.shutdown();
 
         if (deleteEmptyFolders) {
-            logger.info("Removing empty folders...");
-
-            // remove empty dirs
-            Files.walk(Paths.get(sourcePath))
-                    .sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .filter(f -> f.isDirectory())
-                    .forEach(e -> deleteEmptyDir(e));
+            removeEmptyFolders(sourcePath);
         }
 
         logger.info("Moved {} files successfully", moved);
+    }
+
+    private static void removeEmptyFolders(String folderPath) throws IOException {
+        logger.info("Removing empty folders...");
+
+        // remove empty dirs
+        Files.walk(Paths.get(folderPath))
+                .sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .filter(f -> f.isDirectory())
+                .forEach(e -> deleteEmptyDir(e));
+
+    }
+
+    private static void copyAllFiles(String sourcePath, String destinationPath) throws IOException, InterruptedException {
+        copied = 0;
+
+        File outPath = new File (destinationPath);
+        logger.info("Coping files...");
+
+        Files.walk(Paths.get(sourcePath))
+                .map(Path::toFile)
+                .filter(f -> f.isFile())
+                .forEach(f -> copyFile(f, outPath));
+
+        logger.info("Copied {} files successfully", copied);
     }
 
     private static boolean moveFile(File sourceFile, File destinationPath, ExecutorService executor) {
@@ -104,11 +124,43 @@ public class App
                         logger.warn("File {} already exists in path {}, but it has different content", sourceFile.getName(), destFile.getAbsolutePath());
                     }
                 } catch (IOException e) {
-                    logger.error("Cannot delete source file {}", sourceFile.getAbsolutePath());
+                    logger.error("Cannot delete source file {}: {}", sourceFile.getAbsolutePath(), e.getMessage());
                 }
             });
         }
 
+        return false;
+    }
+
+    private static boolean copyFile(File sourceFile, File destinationPath) {
+        FileInfo fileInfo;
+        try {
+            fileInfo = FileInfo.getInstance(sourceFile);
+        } catch (IOException e) {
+            logger.error("Cannot read file {}", sourceFile.getAbsolutePath());
+            return false;
+        }
+        File destFile = PathBuilder.buildDestPath(destinationPath, fileInfo);
+
+        if (sourceFile.equals(destFile)) {
+            logger.debug("Skipping copying same file {} -> {}", sourceFile.getAbsolutePath(), destFile.getAbsolutePath());
+            return false;
+        }
+
+        if (!destFile.exists()) {
+            new File(destFile.getParent()).mkdirs();
+            try {
+                FileUtils.copyFile(sourceFile, destFile);
+            } catch (IOException e) {
+                logger.error("Cannot copy file {}", sourceFile.getAbsolutePath());
+                return false;
+            }
+            logger.info("File {} copied to {}", sourceFile.getName(), destFile.getAbsolutePath());
+            copied++;
+            return true;
+        }
+
+        logger.info("Skipping existing file: {} already exists in path {}", sourceFile.getName(), destFile.getAbsolutePath());
         return false;
     }
 
