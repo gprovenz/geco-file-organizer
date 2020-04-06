@@ -1,0 +1,25 @@
+{
+  "operation": "move",
+  "source_path": "/my-document-folder",
+  "destination_path": "/my-destination-folder",
+  "destination_path_structure": "${file_type}/${year}/${month}-${month_name}-${year}/${day}-${month_name_short}-${year}",
+  "remove_duplicates": "true",
+  "remove_empty_folders": "true",
+  "file_types": [
+    {
+      "file_type": "Photo",
+      "extensions": ["jpg", "jpeg", "raw", "cr2", "gif", "bmp", "psd", "tiff", "tif", "png"],
+      "use_exif_metadata": true
+    },
+    {
+      "file_type": "Video",
+      "extensions": ["mpg", "mpeg", "mkv", "mp4", "avi", "vid", "mov", "3gp"]
+    },
+    {
+      "file_type": "Other",
+      "extensions": ["*"],
+      "include_hidden_files": true,
+      "ignore": true
+    }
+  ]
+}
