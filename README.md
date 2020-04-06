@@ -1,4 +1,4 @@
-# Photo organizer
+# Geco file organizer
 
 This is a simple photo/video file organizer written in Java. It can be used to archive personal multimedia files by date on the filesystem, perform backups on external drives and remove duplicates to save storage space.
 
