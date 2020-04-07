@@ -31,40 +31,37 @@ public class App
     private static int copied = 0;
 
     public static void main(String[] args ) throws IOException, InterruptedException {
+        execCommand(args[0]);
+    }
 
-
-        //String sourcePath = "C:\\Users\\Gas\\Documents\\Dati\\Foto";
-
-       // String sourcePath = "D:\\video\\2020";
-
-        // String destinationPath = "F:\\";
-
-        // moveAllFiles(sourcePath, destinationPath, false);
-        Settings s = SettingsReader.read(new File(args[0]));
-        if (s.getOperation()== Options.Operation.MOVE) {
-            moveAllFiles(s, s.getSourcePath(), s.getDestinationPath(), false);
+    private static void execCommand(String settingsFile) throws IOException, InterruptedException {
+        Settings settings = SettingsReader.read(new File(settingsFile));
+        if (settings.getOperation()== Options.Operation.MOVE) {
+            moveAllFiles(settings);
+        } else if (settings.getOperation()==Options.Operation.COPY) {
+            copyAllFiles(settings);
         } else {
-            copyAllFiles(s, s.getSourcePath(), s.getDestinationPath());
+            throw new IllegalArgumentException("Invalid operation: " + settings.getOperation());
         }
     }
 
-    private static void moveAllFiles(Settings settings, String sourcePath, String destinationPath, boolean deleteEmptyFolders) throws IOException, InterruptedException {
+    private static void moveAllFiles(Settings settings) throws IOException, InterruptedException {
         moved = 0;
 
        ExecutorService executor = Executors.newFixedThreadPool(THREADS);
 
-        File outPath = new File (destinationPath);
+        File outPath = new File (settings.getDestinationPath());
         logger.info("Moving files...");
 
-        Files.walk(Paths.get(sourcePath))
+        Files.walk(Paths.get(settings.getSourcePath()))
                 .map(Path::toFile)
                 .filter(f -> f.isFile())
                 .forEach(f -> moveFile(settings, f, outPath, executor));
 
         executor.shutdown();
 
-        if (deleteEmptyFolders) {
-            removeEmptyFolders(sourcePath);
+        if (settings.isRemoveEmptyFolders()) {
+            removeEmptyFolders(settings.getSourcePath());
         }
 
         logger.info("Moved {} files successfully", moved);
@@ -82,13 +79,13 @@ public class App
 
     }
 
-    private static void copyAllFiles(Settings settings, String sourcePath, String destinationPath) throws IOException, InterruptedException {
+    private static void copyAllFiles(Settings settings) throws IOException, InterruptedException {
         copied = 0;
 
-        File outPath = new File (destinationPath);
+        File outPath = new File (settings.getDestinationPath());
         logger.info("Coping files...");
 
-        Files.walk(Paths.get(sourcePath))
+        Files.walk(Paths.get(settings.getSourcePath()))
                 .map(Path::toFile)
                 .filter(f -> f.isFile())
                 .forEach(f -> copyFile(settings, f, outPath));

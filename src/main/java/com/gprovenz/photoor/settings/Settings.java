@@ -18,10 +18,10 @@ public class Settings {
     private Options.Operation operation;
 
     @JsonProperty("remove_duplicates")
-    private String removeDuplicates;
+    private boolean removeDuplicates;
 
     @JsonProperty("remove_empty_folders")
-    private String removeEmptyFolders;
+    private boolean removeEmptyFolders;
 
     @JsonProperty("source_path")
     private String sourcePath;
@@ -61,19 +61,19 @@ public class Settings {
         this.operation = operation;
     }
 
-    public String getRemoveDuplicates() {
+    public boolean isRemoveDuplicates() {
         return removeDuplicates;
     }
 
-    public void setRemoveDuplicates(String removeDuplicates) {
+    public void setRemoveDuplicates(boolean removeDuplicates) {
         this.removeDuplicates = removeDuplicates;
     }
 
-    public String getRemoveEmptyFolders() {
+    public boolean isRemoveEmptyFolders() {
         return removeEmptyFolders;
     }
 
-    public void setRemoveEmptyFolders(String removeEmptyFolders) {
+    public void setRemoveEmptyFolders(boolean removeEmptyFolders) {
         this.removeEmptyFolders = removeEmptyFolders;
     }
 
