@@ -2,6 +2,9 @@ package com.gprovenz;
 
 import com.gprovenz.photoor.reader.FileInfo;
 import com.gprovenz.photoor.reader.PathBuilder;
+import com.gprovenz.photoor.settings.Options;
+import com.gprovenz.photoor.settings.Settings;
+import com.gprovenz.photoor.settings.SettingsReader;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,15 +35,20 @@ public class App
 
         //String sourcePath = "C:\\Users\\Gas\\Documents\\Dati\\Foto";
 
-        String sourcePath = "D:\\video\\2020";
+       // String sourcePath = "D:\\video\\2020";
 
-        String destinationPath = "F:\\";
+        // String destinationPath = "F:\\";
 
         // moveAllFiles(sourcePath, destinationPath, false);
-        copyAllFiles(sourcePath, destinationPath);
+        Settings s = SettingsReader.read(new File(args[0]));
+        if (s.getOperation()== Options.Operation.MOVE) {
+            moveAllFiles(s, s.getSourcePath(), s.getDestinationPath(), false);
+        } else {
+            copyAllFiles(s, s.getSourcePath(), s.getDestinationPath());
+        }
     }
 
-    private static void moveAllFiles(String sourcePath, String destinationPath, boolean deleteEmptyFolders) throws IOException, InterruptedException {
+    private static void moveAllFiles(Settings settings, String sourcePath, String destinationPath, boolean deleteEmptyFolders) throws IOException, InterruptedException {
         moved = 0;
 
        ExecutorService executor = Executors.newFixedThreadPool(THREADS);
@@ -51,7 +59,7 @@ public class App
         Files.walk(Paths.get(sourcePath))
                 .map(Path::toFile)
                 .filter(f -> f.isFile())
-                .forEach(f -> moveFile(f, outPath, executor));
+                .forEach(f -> moveFile(settings, f, outPath, executor));
 
         executor.shutdown();
 
@@ -74,7 +82,7 @@ public class App
 
     }
 
-    private static void copyAllFiles(String sourcePath, String destinationPath) throws IOException, InterruptedException {
+    private static void copyAllFiles(Settings settings, String sourcePath, String destinationPath) throws IOException, InterruptedException {
         copied = 0;
 
         File outPath = new File (destinationPath);
@@ -83,12 +91,12 @@ public class App
         Files.walk(Paths.get(sourcePath))
                 .map(Path::toFile)
                 .filter(f -> f.isFile())
-                .forEach(f -> copyFile(f, outPath));
+                .forEach(f -> copyFile(settings, f, outPath));
 
         logger.info("Copied {} files successfully", copied);
     }
 
-    private static boolean moveFile(File sourceFile, File destinationPath, ExecutorService executor) {
+    private static boolean moveFile(Settings settings, File sourceFile, File destinationPath, ExecutorService executor) {
         FileInfo fileInfo;
         try {
             fileInfo = FileInfo.getInstance(sourceFile);
@@ -96,7 +104,7 @@ public class App
             logger.error("Cannot read file {}", sourceFile.getAbsolutePath());
             return false;
         }
-        File destFile = PathBuilder.buildDestPath(destinationPath, fileInfo);
+        File destFile = PathBuilder.buildDestPath(settings, destinationPath, fileInfo);
 
         if (sourceFile.equals(destFile)) {
             logger.debug("Skipping moving same file {} -> {}", sourceFile.getAbsolutePath(), destFile.getAbsolutePath());
@@ -132,7 +140,7 @@ public class App
         return false;
     }
 
-    private static boolean copyFile(File sourceFile, File destinationPath) {
+    private static boolean copyFile(Settings settings, File sourceFile, File destinationPath) {
         FileInfo fileInfo;
         try {
             fileInfo = FileInfo.getInstance(sourceFile);
@@ -140,7 +148,7 @@ public class App
             logger.error("Cannot read file {}", sourceFile.getAbsolutePath());
             return false;
         }
-        File destFile = PathBuilder.buildDestPath(destinationPath, fileInfo);
+        File destFile = PathBuilder.buildDestPath(settings, destinationPath, fileInfo);
 
         if (sourceFile.equals(destFile)) {
             logger.debug("Skipping copying same file {} -> {}", sourceFile.getAbsolutePath(), destFile.getAbsolutePath());

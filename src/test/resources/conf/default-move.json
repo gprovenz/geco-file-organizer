@@ -9,7 +9,7 @@
     {
       "file_type": "Photo",
       "extensions": ["jpg", "jpeg", "raw", "cr2", "gif", "bmp", "psd", "tiff", "tif", "png"],
-      "use_exif_metadata": true
+      "read_exif_metadata": true
     },
     {
       "file_type": "Video",

@@ -1,11 +1,13 @@
 package com.gprovenz.photoor.reader;
 
+import com.gprovenz.photoor.settings.Settings;
+
 import java.io.File;
 import java.util.Calendar;
 import java.util.Locale;
 
 public class PathBuilder {
-    public static File buildDestPath(File parent, FileInfo fileInfo) {
+    public static File buildDestPath(Settings settings, File parent, FileInfo fileInfo) {
         Calendar c = Calendar.getInstance();
         c.setTime(fileInfo.getCreationDate());
         int year = c.get(Calendar.YEAR);
