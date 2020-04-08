@@ -31,7 +31,7 @@ public class App
     private static int copied = 0;
 
     public static void main(String[] args ) throws IOException, InterruptedException {
-        execCommand(args[0]);
+        execCommand(args[1]);
     }
 
     private static void execCommand(String settingsFile) throws IOException, InterruptedException {
