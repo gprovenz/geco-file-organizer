@@ -2,6 +2,9 @@
 
 This is a simple photo/video file organizer written in Java. It can be used to archive personal multimedia files by date on the filesystem, perform backups on external drives and remove duplicates to save storage space.
 
+## Status
+The project is still at DRAFT version. 
+
 ## Getting Started
 
 The project can be imported as a Maven project. Executable binaries (jar) is also available.  
