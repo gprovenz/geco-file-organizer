@@ -5,6 +5,8 @@ import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
+import com.gprovenz.photoor.settings.FileType;
+import com.gprovenz.photoor.settings.Settings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -16,21 +18,25 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
+import java.util.Optional;
 
 public class FileInfo {
     private static Logger logger = LogManager.getLogger();
 
-    private static final String[] PICTURE_EXTS = new String[] {
-            "jpg", "jpeg", "raw", "cr2", "gif", "bmp", "psd", "tiff", "tif", "png"};
-    private static final String[] VIDEO_EXTS = new String[] {
-            "mpg", "mpeg", "mkv", "mp4", "avi", "vid", "mov", "3gp"};
-
-    public enum MediaType { PICTURE, VIDEO, OTHER }
     private String fileName;
     private long size;
     private Date creationDate;
     private Date lastModifiedDate;
-    private MediaType mediaType;
+    private Optional<FileType> fileType;
+
+    public Optional<FileType> getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(Optional<FileType> fileType) {
+        this.fileType = fileType;
+    }
+
     private boolean hasExif;
 
     private FileInfo() { }
@@ -60,53 +66,53 @@ public class FileInfo {
         return new Date();
     }
 
-    public static FileInfo getInstance(File file) throws IOException {
+    public static Optional<FileInfo> getInstance(Settings settings, File file) throws IOException {
         if (!file.isFile()) {
             throw new IllegalArgumentException("Invalid file " + file.getAbsolutePath());
         }
         if (!file.exists()) {
             throw new FileNotFoundException("File not found: " + file.getAbsolutePath());
         }
-        FileInfo fi = new FileInfo();
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.fileType = getFileType(settings, file);
+        if (!fileInfo.fileType.isPresent()) {
+            return Optional.empty();
+        }
+
         BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
-        fi.size = attr.size();
-        fi.fileName = file.getName();
-        fi.mediaType = detectMediaType(file);
-        fi.creationDate = new Date(attr.creationTime().toMillis());
-        fi.lastModifiedDate = new Date(attr.lastModifiedTime().toMillis());
+        fileInfo.size = attr.size();
+        fileInfo.fileName = file.getName();
+        fileInfo.creationDate = new Date(attr.creationTime().toMillis());
+        fileInfo.lastModifiedDate = new Date(attr.lastModifiedTime().toMillis());
+        fileInfo.creationDate = getMinValidDate(fileInfo.creationDate, fileInfo.lastModifiedDate);
 
-        fi.creationDate = getMinValidDate(fi.creationDate, fi.lastModifiedDate);
-
-        if (fi.mediaType == MediaType.PICTURE) {
+        if (fileInfo.fileType.get().isReadExifMetadata()) {
             try {
                 Date exifDate = readCreationDateFromExifMetadata(file);
                 if (exifDate == null) {
                     logger.debug("EXIF metadata not fond for file '{}'", file.getAbsolutePath());
                 } else {
-                    fi.creationDate = getMinValidDate(fi.creationDate, exifDate);
-                    fi.hasExif = true;
+                    fileInfo.creationDate = getMinValidDate(fileInfo.creationDate, exifDate);
+                    fileInfo.hasExif = true;
                 }
             } catch (ImageProcessingException e) {
                 logger.warn("Error reading EXIF metadata from file {}", file.getAbsolutePath());
             }
         }
 
-        return fi;
+        return Optional.of(fileInfo);
     }
 
-    private static MediaType detectMediaType(File file) {
+    private static Optional<FileType> getFileType(Settings settings, File file) {
         final String fileName = file.getName().toLowerCase();
-        for (String ext:PICTURE_EXTS) {
-            if (fileName.endsWith("." + ext)) {
-                return MediaType.PICTURE;
+        for (FileType fileType:settings.getFileTypes()) {
+            for (String ext:fileType.getExtensions()) {
+                if (fileName.endsWith("." + ext)) {
+                    return Optional.of(fileType);
+                }
             }
         }
-        for (String ext:VIDEO_EXTS) {
-            if (fileName.endsWith("." + ext)) {
-                return MediaType.VIDEO;
-            }
-        }
-        return MediaType.OTHER;
+        return Optional.empty();
     }
 
     private static Date readCreationDateFromExifMetadata(File file) throws ImageProcessingException, IOException {
@@ -126,10 +132,6 @@ public class FileInfo {
         return creationDate;
     }
 
-    public MediaType getMediaType() {
-        return mediaType;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -139,20 +141,18 @@ public class FileInfo {
                 hasExif == fileInfo.hasExif &&
                 fileName.equals(fileInfo.fileName) &&
                 creationDate.equals(fileInfo.creationDate) &&
-                lastModifiedDate.equals(fileInfo.lastModifiedDate) &&
-                mediaType == fileInfo.mediaType;
+                lastModifiedDate.equals(fileInfo.lastModifiedDate);
     }
 
     public boolean potentiallySameFile(FileInfo fileInfo) {
         return size == fileInfo.size &&
                 hasExif == fileInfo.hasExif &&
-                fileName.equalsIgnoreCase(fileInfo.fileName) &&
-                mediaType == fileInfo.mediaType;
+                fileName.equalsIgnoreCase(fileInfo.fileName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fileName, size, creationDate, lastModifiedDate, mediaType, hasExif);
+        return Objects.hash(fileName, size, creationDate, lastModifiedDate, hasExif);
     }
 
     @Override
@@ -162,7 +162,6 @@ public class FileInfo {
                 "\n size =              " + size +
                 "\n creationDate =      " + creationDate +
                 "\n lastModifiedDate =  " + lastModifiedDate +
-                "\n mediaType =         " + mediaType +
                 "\n EXIF metadata =     " + hasExif +
                 "\n}";
     }

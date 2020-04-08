@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -31,11 +32,11 @@ public class App
     private static int copied = 0;
 
     public static void main(String[] args ) throws IOException, InterruptedException {
-        execCommand(args[0]);
+        execCommand(new File(args[1]));
     }
 
-    private static void execCommand(String settingsFile) throws IOException, InterruptedException {
-        Settings settings = SettingsReader.read(new File(settingsFile));
+    private static void execCommand(File settingsFile) throws IOException, InterruptedException {
+        Settings settings = SettingsReader.read(settingsFile);
         if (settings.getOperation()== Options.Operation.MOVE) {
             moveAllFiles(settings);
         } else if (settings.getOperation()==Options.Operation.COPY) {
@@ -94,14 +95,19 @@ public class App
     }
 
     private static boolean moveFile(Settings settings, File sourceFile, File destinationPath, ExecutorService executor) {
-        FileInfo fileInfo;
+        Optional<FileInfo> fileInfo;
         try {
-            fileInfo = FileInfo.getInstance(sourceFile);
+            fileInfo = FileInfo.getInstance(settings, sourceFile);
         } catch (IOException e) {
             logger.error("Cannot read file {}", sourceFile.getAbsolutePath());
             return false;
         }
-        File destFile = PathBuilder.buildDestPath(settings, destinationPath, fileInfo);
+        if (isToIgnore(fileInfo))  {
+            logger.debug("Ignoring file {}", sourceFile.getAbsolutePath());
+            return false;
+        }
+
+        File destFile = PathBuilder.buildDestPath(settings, destinationPath, fileInfo.get());
 
         if (sourceFile.equals(destFile)) {
             logger.debug("Skipping moving same file {} -> {}", sourceFile.getAbsolutePath(), destFile.getAbsolutePath());
@@ -122,7 +128,7 @@ public class App
         } else {
             executor.submit(() -> {
                 try {
-                    if (sameContent(sourceFile, destFile)) {
+                    if (sameContent(settings, sourceFile, destFile)) {
                         logger.info("File {} already exists in path {}", sourceFile.getName(), destFile.getAbsolutePath());
                         sourceFile.delete();
                     } else {
@@ -138,14 +144,19 @@ public class App
     }
 
     private static boolean copyFile(Settings settings, File sourceFile, File destinationPath) {
-        FileInfo fileInfo;
+        Optional<FileInfo> fileInfo;
         try {
-            fileInfo = FileInfo.getInstance(sourceFile);
+            fileInfo = FileInfo.getInstance(settings, sourceFile);
         } catch (IOException e) {
             logger.error("Cannot read file {}", sourceFile.getAbsolutePath());
             return false;
         }
-        File destFile = PathBuilder.buildDestPath(settings, destinationPath, fileInfo);
+        if (isToIgnore(fileInfo))  {
+            logger.debug("Ignoring file {}", sourceFile.getAbsolutePath());
+            return false;
+        }
+
+        File destFile = PathBuilder.buildDestPath(settings, destinationPath, fileInfo.get());
 
         if (sourceFile.equals(destFile)) {
             logger.debug("Skipping copying same file {} -> {}", sourceFile.getAbsolutePath(), destFile.getAbsolutePath());
@@ -169,10 +180,16 @@ public class App
         return false;
     }
 
-    private static boolean sameContent(File sourceFile, File destFile) throws IOException {
-        FileInfo source = FileInfo.getInstance(sourceFile);
-        FileInfo dest = FileInfo.getInstance(destFile);
-        if(source.potentiallySameFile(dest)) {
+    private static boolean isToIgnore(Optional<FileInfo> fileInfo) {
+        return !fileInfo.isPresent() ||
+                !fileInfo.get().getFileType().isPresent() ||
+                fileInfo.get().getFileType().get().isIgnore();
+    }
+
+    private static boolean sameContent(Settings settings, File sourceFile, File destFile) throws IOException {
+        Optional<FileInfo> source = FileInfo.getInstance(settings, sourceFile);
+        Optional<FileInfo> dest = FileInfo.getInstance(settings, destFile);
+        if(source.isPresent() && dest.isPresent() && source.get().potentiallySameFile(dest.get())) {
             // they seem the same file. Checking for content:
             return FileUtils.contentEquals(sourceFile, destFile);
         } else {

@@ -1,5 +1,7 @@
 package com.gprovenz.photoor.reader;
 
+import com.gprovenz.photoor.settings.Settings;
+import com.gprovenz.photoor.settings.SettingsReader;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -12,11 +14,13 @@ class FileInfoTest {
     @Test
     void givenSamePictureThenEqual() throws IOException {
         ClassLoader classLoader = new FileInfoTest().getClass().getClassLoader();
+        Settings settings = SettingsReader.read(new File(classLoader.getResource("conf/test-copy-1.json").getFile()));
+
         File file1 = new File(classLoader.getResource("pictures/IMG_7546.JPG").getFile());
         File file2 = new File(classLoader.getResource("pictures/IMG_7546.JPG").getFile());
 
-        FileInfo f1 = FileInfo.getInstance(file1);
-        FileInfo f2 = FileInfo.getInstance(file2);
+        FileInfo f1 = FileInfo.getInstance(settings, file1).get();
+        FileInfo f2 = FileInfo.getInstance(settings, file2).get();
 
         assertTrue(f1!=f2);
         assertEquals(f1, f2);
@@ -28,11 +32,13 @@ class FileInfoTest {
     @Test
     void givenDifferentPictureThenNotEqual() throws IOException {
         ClassLoader classLoader = new FileInfoTest().getClass().getClassLoader();
+        Settings settings = SettingsReader.read(new File(classLoader.getResource("conf/test-copy-1.json").getFile()));
+
         File file1 = new File(classLoader.getResource("pictures/IMG_7546.JPG").getFile());
         File file2 = new File(classLoader.getResource("pictures/IMG_7547.JPG").getFile());
 
-        FileInfo f1 = FileInfo.getInstance(file1);
-        FileInfo f2 = FileInfo.getInstance(file2);
+        FileInfo f1 = FileInfo.getInstance(settings, file1).get();
+        FileInfo f2 = FileInfo.getInstance(settings, file2).get();
 
         assertTrue(f1!=f2);
         assertNotEquals(f1, f2);

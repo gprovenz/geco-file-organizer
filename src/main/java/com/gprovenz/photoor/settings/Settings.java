@@ -99,11 +99,11 @@ public class Settings {
                 "destinationPath='" + destinationPath + '\'' +
                 ", destinationPathStructure='" + destinationPathStructure + '\'' +
                 ", fileTypes=" + fileTypes +
-                ", operation='" + operation + '\'' +
-                ", removeDuplicates='" + removeDuplicates + '\'' +
-                ", removeEmptyFolders='" + removeEmptyFolders + '\'' +
+                ", operation=" + operation +
+                ", removeDuplicates=" + removeDuplicates +
+                ", removeEmptyFolders=" + removeEmptyFolders +
                 ", sourcePath='" + sourcePath + '\'' +
-                ", on_existing_file_action=" + onExistingFileAction +
+                ", onExistingFileAction=" + onExistingFileAction +
                 '}';
     }
 }

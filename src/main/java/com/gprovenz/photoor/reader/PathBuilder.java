@@ -14,11 +14,16 @@ public class PathBuilder {
         int month = c.get(Calendar.MONTH) + 1;
         int day = c.get(Calendar.DAY_OF_MONTH);
 
-        String monthShort = c.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
         String monthLong = c.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault());
+        String monthShort = c.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
 
-        String path = String.format("%s/%s/%02d-%s-%s/%02d-%s-%s/",
-                fileInfo.getMediaType(), year, month, monthLong, year, day, monthShort, year);
+        String path = settings.getDestinationPathStructure()
+                .replace("${file_type}", fileInfo.getFileType().get().getFileType())
+                .replace("${year}", String.valueOf(year))
+                .replace("${month}", String.format("%02d", month))
+                .replace("${day}", String.format("%02d", day))
+                .replace("${month_name}", String.valueOf(monthLong))
+                .replace("${month_name_short}", String.valueOf(monthShort));
 
         return new File(new File(parent, path), fileInfo.getFileName());
     }

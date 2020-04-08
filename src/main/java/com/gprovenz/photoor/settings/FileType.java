@@ -33,7 +33,7 @@ public class FileType {
         this.fileType = fileType;
     }
 
-    public Boolean getReadExifMetadata() {
+    public Boolean isReadExifMetadata() {
         return readExifMetadata;
     }
 
