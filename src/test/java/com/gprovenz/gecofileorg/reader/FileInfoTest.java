@@ -1,7 +1,7 @@
-package com.gprovenz.photoor.reader;
+package com.gprovenz.gecofileorg.reader;
 
-import com.gprovenz.photoor.settings.Settings;
-import com.gprovenz.photoor.settings.SettingsReader;
+import com.gprovenz.gecofileorg.settings.Settings;
+import com.gprovenz.gecofileorg.settings.SettingsReader;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

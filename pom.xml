@@ -36,11 +36,10 @@
       <artifactId>log4j-core</artifactId>
       <version>2.13.1</version>
     </dependency>
-
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>RELEASE</version>
+      <version>5.6.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -53,12 +52,6 @@
       <artifactId>jackson-databind</artifactId>
       <version>2.11.0.rc1</version>
     </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>2.11.0.rc1</version>
-    </dependency>
-
   </dependencies>
 
   <build>
@@ -103,7 +96,21 @@
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>3.0.0</version>
         </plugin>
+        <plugin>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <configuration>
+            <archive>
+              <manifest>
+                <mainClass>com.gprovenz.gecofileorg.CommandLineApp</mainClass>
+              </manifest>
+            </archive>
+            <descriptorRefs>
+              <descriptorRef>jar-with-dependencies</descriptorRef>
+            </descriptorRefs>
+          </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
+
 </project>

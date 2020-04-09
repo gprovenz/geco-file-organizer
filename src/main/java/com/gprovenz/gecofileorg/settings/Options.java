@@ -1,4 +1,4 @@
-package com.gprovenz.photoor.settings;
+package com.gprovenz.gecofileorg.settings;
 
 public interface Options {
     enum OnExistingFileAction { OVERWRITE, SKIP}

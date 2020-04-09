@@ -1,4 +1,4 @@
-package com.gprovenz.photoor.settings;
+package com.gprovenz.gecofileorg.settings;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

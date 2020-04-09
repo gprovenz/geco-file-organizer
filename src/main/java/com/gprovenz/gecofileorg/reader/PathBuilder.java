@@ -1,6 +1,6 @@
-package com.gprovenz.photoor.reader;
+package com.gprovenz.gecofileorg.reader;
 
-import com.gprovenz.photoor.settings.Settings;
+import com.gprovenz.gecofileorg.settings.Settings;
 
 import java.io.File;
 import java.util.Calendar;

@@ -1,12 +1,12 @@
-package com.gprovenz.photoor.reader;
+package com.gprovenz.gecofileorg.reader;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
-import com.gprovenz.photoor.settings.FileType;
-import com.gprovenz.photoor.settings.Settings;
+import com.gprovenz.gecofileorg.settings.FileType;
+import com.gprovenz.gecofileorg.settings.Settings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

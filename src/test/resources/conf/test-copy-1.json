@@ -4,6 +4,7 @@
   "destination_path": "/my-backup-folder",
   "destination_path_structure": "${file_type}/${year}/${month}-${month_name}-${year}/${day}-${month_name_short}-${year}",
   "on_existing_file_action": "OVERWRITE",
+  "locale": "us",
   "file_types": [
     {
       "file_type": "Photo",

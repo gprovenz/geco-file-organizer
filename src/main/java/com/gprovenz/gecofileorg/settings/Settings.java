@@ -1,9 +1,10 @@
 
-package com.gprovenz.photoor.settings;
+package com.gprovenz.gecofileorg.settings;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
+import java.util.Locale;
 
 public class Settings {
     @JsonProperty("destination_path")
@@ -28,6 +29,9 @@ public class Settings {
 
     @JsonProperty("on_existing_file_action")
     private Options.OnExistingFileAction onExistingFileAction;
+
+    @JsonProperty("locale")
+    private Locale locale;
 
     public String getDestinationPath() {
         return destinationPath;
@@ -105,5 +109,14 @@ public class Settings {
                 ", sourcePath='" + sourcePath + '\'' +
                 ", onExistingFileAction=" + onExistingFileAction +
                 '}';
+    }
+
+    public Locale getLocale() {
+        return locale;
+    }
+
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+        Locale.setDefault(locale);
     }
 }
