@@ -14,8 +14,10 @@ import java.io.IOException;
  */
 public class CommandLineApp {
 
+    private static final String VERSION = "0.1-alfa";
+
     public static void main(String[] args ) throws IOException, InterruptedException {
-        System.out.println("Geco File Organizer v. 1.0 beta");
+        System.out.println("Geco File Organizer v." + VERSION);
         if (args.length<1) {
             System.out.println("Please specify settings file.");
             System.exit(1);

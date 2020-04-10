@@ -108,6 +108,7 @@ public class Settings {
                 ", removeEmptyFolders=" + removeEmptyFolders +
                 ", sourcePath='" + sourcePath + '\'' +
                 ", onExistingFileAction=" + onExistingFileAction +
+                ", locale=" + locale +
                 '}';
     }
 

@@ -45,7 +45,7 @@ public class FileCopier {
         try {
             fileInfo = FileInfo.getInstance(settings, sourceFile);
         } catch (IOException e) {
-            logger.error("Cannot read file {}", sourceFile.getAbsolutePath());
+            logger.error("Cannot read file " + sourceFile.getAbsolutePath(), e);
             return false;
         }
         if (isToIgnore(fileInfo))  {
@@ -65,7 +65,7 @@ public class FileCopier {
             try {
                 FileUtils.copyFile(sourceFile, destFile);
             } catch (IOException e) {
-                logger.error("Cannot copy file {}", sourceFile.getAbsolutePath());
+                logger.error("Error copying file " + sourceFile.getAbsolutePath() + " to "  + destinationPath, e);
                 return false;
             }
             logger.info("File {} copied to {}", sourceFile.getName(), destFile.getAbsolutePath());

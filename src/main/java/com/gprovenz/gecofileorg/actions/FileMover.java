@@ -55,7 +55,7 @@ public class FileMover {
         try {
             fileInfo = FileInfo.getInstance(settings, sourceFile);
         } catch (IOException e) {
-            logger.error("Cannot read file {}", sourceFile.getAbsolutePath());
+            logger.error("Cannot read file " + sourceFile.getAbsolutePath(), e);
             return false;
         }
         if (FileTools.isToIgnore(fileInfo))  {
@@ -75,7 +75,7 @@ public class FileMover {
             try {
                 FileUtils.moveFile(sourceFile, destFile);
             } catch (IOException e) {
-                logger.error("Cannot move file {}", sourceFile.getAbsolutePath());
+                logger.error("Error moving file " + sourceFile.getAbsolutePath() + " to " + destinationPath, e);
                 return false;
             }
             logger.info("File {} moved to {}", sourceFile.getName(), destFile.getAbsolutePath());
