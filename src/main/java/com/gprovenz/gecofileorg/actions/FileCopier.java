@@ -19,7 +19,6 @@ import static com.gprovenz.gecofileorg.reader.FileTools.isToIgnore;
 public class FileCopier {
 
     private final Settings settings;
-    private int moved;
     private Logger logger = LogManager.getLogger();
     private int copied;
 

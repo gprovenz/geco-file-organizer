@@ -5,12 +5,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.gprovenz</groupId>
-  <artifactId>photo-organizer</artifactId>
+  <artifactId>geco-file-organizer</artifactId>
   <version>1.0-SNAPSHOT</version>
 
-  <name>photo-organizer</name>
-  <!-- FIXME change it to the project's website -->
-  <url>http://www.example.com</url>
+  <name>geco-file-organizer</name>
+
+  <url>http://www.github.com/gprovenz/geco-file-organizer</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -55,7 +55,6 @@
   </dependencies>
 
   <build>
-    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
         <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
         <plugin>
@@ -93,24 +92,31 @@
           <version>3.7.1</version>
         </plugin>
         <plugin>
-          <artifactId>maven-project-info-reports-plugin</artifactId>
-          <version>3.0.0</version>
-        </plugin>
-        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
-          <configuration>
-            <archive>
-              <manifest>
-                <mainClass>com.gprovenz.gecofileorg.CommandLineApp</mainClass>
-              </manifest>
-            </archive>
-            <descriptorRefs>
-              <descriptorRef>jar-with-dependencies</descriptorRef>
-            </descriptorRefs>
-          </configuration>
+          <version>3.2.0</version>
+          <executions>
+            <execution>
+              <id>assembly</id>
+              <phase>package</phase> <!-- bind to the packaging phase -->
+              <goals>
+                <goal>single</goal>
+              </goals>
+              <configuration>
+                <descriptorRefs>
+                  <descriptorRef>jar-with-dependencies</descriptorRef>
+                </descriptorRefs>
+                <archive>
+                  <manifest>
+                    <mainClass>com.gprovenz.gecofileorg.CommandLineApp</mainClass>
+                  </manifest>
+                </archive>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
-    </pluginManagement>
+
   </build>
 
 </project>
