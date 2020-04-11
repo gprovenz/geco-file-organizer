@@ -4,7 +4,7 @@
   "destination_path": "/my-backup-folder",
   "destination_path_structure": "${file_type}/${year}/${month}-${month_name}-${year}/${day}-${month_name_short}-${year}",
   "on_existing_file_action": "OVERWRITE",
-  "locale": "us",
+  "locale": "en-us",
   "file_types": [
     {
       "file_type": "Photo",
@@ -13,7 +13,7 @@
     },
     {
       "file_type": "Video",
-      "extensions": ["mpg", "mpeg", "mkv", "mp4", "avi", "vid", "mov", "3gp"]
+      "extensions": ["mpg", "mpeg", "mkv", "mp4", "avi", "vid", "mov", "3gp", "asf"]
     },
     {
       "file_type": "Other",

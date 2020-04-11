@@ -2,14 +2,10 @@
 package com.gprovenz.gecofileorg.settings;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.ToString;
 
 import java.util.List;
 import java.util.Locale;
 
-@Getter
-@ToString
 public class Settings {
     @JsonProperty("destination_path")
     private String destinationPath;
@@ -37,5 +33,39 @@ public class Settings {
     @JsonProperty("locale")
     private Locale locale;
 
+    public String getDestinationPath() {
+        return destinationPath;
+    }
 
+    public String getDestinationPathStructure() {
+        return destinationPathStructure;
+    }
+
+    public List<FileType> getFileTypes() {
+        return fileTypes;
+    }
+
+    public Options.Operation getOperation() {
+        return operation;
+    }
+
+    public boolean isRemoveDuplicates() {
+        return removeDuplicates;
+    }
+
+    public boolean isRemoveEmptyFolders() {
+        return removeEmptyFolders;
+    }
+
+    public String getSourcePath() {
+        return sourcePath;
+    }
+
+    public Options.OnExistingFileAction getOnExistingFileAction() {
+        return onExistingFileAction;
+    }
+
+    public Locale getLocale() {
+        return locale;
+    }
 }
