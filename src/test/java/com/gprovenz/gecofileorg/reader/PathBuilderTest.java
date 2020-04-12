@@ -18,14 +18,14 @@ class PathBuilderTest {
         ClassLoader classLoader = new FileInfoTest().getClass().getClassLoader();
 
         Settings settings = SettingsReader.read(new File(classLoader.getResource("conf/test-copy-1.json").getFile()));
-        Optional<FileInfo> fileInfo = FileInfo.getInstance(settings, new File(classLoader.getResource("pictures/IMG_5370.JPG").getFile()));
+        Optional<FileInfo> fileInfo = FileInfo.getInstance(settings, new File(classLoader.getResource("pictures/IMG_2.JPG").getFile()));
 
         assertTrue(fileInfo.isPresent());
 
         File root = new File ("/temp/outpath/");
         String outPath = PathBuilder.buildDestPath(settings, root, fileInfo.get()).getPath().replace("\\", "/");
 
-        assertEquals("/temp/outpath/Photo/2017/08-August-2017/11-Aug-2017/IMG_5370.JPG", outPath);
+        assertEquals("/temp/outpath/Photo/2017/08-August-2017/11-Aug-2017/IMG_2.JPG", outPath);
     }
 
     @Test
@@ -33,13 +33,13 @@ class PathBuilderTest {
         ClassLoader classLoader = new FileInfoTest().getClass().getClassLoader();
 
         Settings settings = SettingsReader.read(new File(classLoader.getResource("conf/test-copy-1.json").getFile()));
-        Optional<FileInfo> fileInfo = FileInfo.getInstance(settings, new File(classLoader.getResource("pictures/IMG_5370.JPG").getFile()));
+        Optional<FileInfo> fileInfo = FileInfo.getInstance(settings, new File(classLoader.getResource("pictures/IMG_2.JPG").getFile()));
 
         assertTrue(fileInfo.isPresent());
 
         File root = new File ("/temp/outpath/");
         String outPath = PathBuilder.buildDestPath(settings, root, fileInfo.get()).getPath().replace("\\", "/");
 
-        assertEquals("/temp/outpath/Photo/2017/08-August-2017/11-Aug-2017/IMG_5370.JPG", outPath);
+        assertEquals("/temp/outpath/Photo/2017/08-August-2017/11-Aug-2017/IMG_2.JPG", outPath);
     }
 }

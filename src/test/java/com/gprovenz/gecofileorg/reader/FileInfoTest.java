@@ -16,8 +16,8 @@ class FileInfoTest {
         ClassLoader classLoader = new FileInfoTest().getClass().getClassLoader();
         Settings settings = SettingsReader.read(new File(classLoader.getResource("conf/test-copy-1.json").getFile()));
 
-        File file1 = new File(classLoader.getResource("pictures/IMG_7546.JPG").getFile());
-        File file2 = new File(classLoader.getResource("pictures/IMG_7546.JPG").getFile());
+        File file1 = new File(classLoader.getResource("pictures/IMG_1.JPG").getFile());
+        File file2 = new File(classLoader.getResource("pictures/IMG_1.JPG").getFile());
 
         FileInfo f1 = FileInfo.getInstance(settings, file1).get();
         FileInfo f2 = FileInfo.getInstance(settings, file2).get();
@@ -34,8 +34,8 @@ class FileInfoTest {
         ClassLoader classLoader = new FileInfoTest().getClass().getClassLoader();
         Settings settings = SettingsReader.read(new File(classLoader.getResource("conf/test-copy-1.json").getFile()));
 
-        File file1 = new File(classLoader.getResource("pictures/IMG_7546.JPG").getFile());
-        File file2 = new File(classLoader.getResource("pictures/IMG_7547.JPG").getFile());
+        File file1 = new File(classLoader.getResource("pictures/IMG_2.JPG").getFile());
+        File file2 = new File(classLoader.getResource("pictures/IMG_3.JPG").getFile());
 
         FileInfo f1 = FileInfo.getInstance(settings, file1).get();
         FileInfo f2 = FileInfo.getInstance(settings, file2).get();

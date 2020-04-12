@@ -13,9 +13,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class FileMover {
     public static final int THREADS = 4;
@@ -33,13 +37,24 @@ public class FileMover {
 
         ExecutorService executor = Executors.newFixedThreadPool(THREADS);
 
+        List<Future<Boolean>> futures = new ArrayList<>();
+
         File outPath = new File (settings.getDestinationPath());
         logger.info("Moving files...");
 
         Files.walk(Paths.get(settings.getSourcePath()))
                 .map(Path::toFile)
                 .filter(f -> f.isFile())
-                .forEach(f -> moveFile(settings, f, outPath, executor));
+                .forEach(f -> moveFile(settings, f, outPath, executor, futures));
+
+        logger.info("Cleaning up...");
+        for (Future<Boolean> f:futures) {
+            try {
+                f.get();
+            } catch (InterruptedException | ExecutionException e) {
+                logger.error ("Error while waiting for cleaning threads", e);
+            }
+        }
 
         executor.shutdown();
 
@@ -47,10 +62,10 @@ public class FileMover {
             FileTools.removeEmptyFolders(settings.getSourcePath());
         }
 
-        logger.info("Moved {} files successfully", moved);
+        logger.info("{} files moved successfully", moved);
     }
 
-    private boolean moveFile(Settings settings, File sourceFile, File destinationPath, ExecutorService executor) {
+    private boolean moveFile(Settings settings, File sourceFile, File destinationPath, ExecutorService executor, List<Future<Boolean>> futures) {
         Optional<FileInfo> fileInfo;
         try {
             fileInfo = FileInfo.getInstance(settings, sourceFile);
@@ -82,18 +97,23 @@ public class FileMover {
             moved++;
             return true;
         } else {
-            executor.submit(() -> {
+            futures.add(executor.submit(() -> {
                 try {
                     if (FileTools.sameContent(settings, sourceFile, destFile)) {
                         logger.info("File {} already exists in path {}", sourceFile.getName(), destFile.getAbsolutePath());
-                        sourceFile.delete();
+                        if (settings.isRemoveDuplicates()) {
+                            sourceFile.delete();
+                            return true;
+                        }
                     } else {
                         logger.warn("File {} already exists in path {}, but it has different content", sourceFile.getName(), destFile.getAbsolutePath());
                     }
                 } catch (IOException e) {
                     logger.error("Cannot delete source file {}: {}", sourceFile.getAbsolutePath(), e.getMessage());
+
                 }
-            });
+                return false;
+            }));
         }
 
         return false;
