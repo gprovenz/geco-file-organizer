@@ -122,7 +122,7 @@ class FileMoverTest {
 
         String tree = DirectoryTree.getTree(tempDir);
 
-        assertEquals("|  |  +--" + tempDir.getName() + "\n" +
+        assertTrue(tree.startsWith("|  |  +--" + tempDir.getName() + "\n" +
                 "|  |  |  +--dest\n" +
                 "|  |  |  |  +--Photo\n" +
                 "|  |  |  |  |  +--2017\n" +
@@ -137,11 +137,13 @@ class FileMoverTest {
                 "|  |  |  |  |  |  |  +--26-May-2018\n" +
                 "|  |  |  |  |  |  |  |  +--IMG_4.JPG\n" +
                 "|  |  |  |  |  |  |  |  +--IMG_5.JPG\n" +
-                "|  |  |  +--source\n" +
-                "|  |  |  |  +--IMG_1.JPG\n" +
-                "|  |  |  |  +--IMG_2.JPG\n" +
-                "|  |  |  |  +--doc_1.txt\n" +
-                "|  |  |  |  +--doc_2.txt\n", tree);
+                "|  |  |  +--source\n"));
+
+        int index = tree.indexOf("+--source");
+        assertTrue(tree.indexOf("IMG_1.JPG", index)>0);
+        assertTrue(tree.indexOf("IMG_2.JPG", index)>0);
+        assertTrue(tree.indexOf("doc_1.txt", index)>0);
+        assertTrue(tree.indexOf("doc_2.txt", index)>0);
     }
 
     @Test
