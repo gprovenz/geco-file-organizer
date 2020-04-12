@@ -14,7 +14,7 @@ import java.io.IOException;
  */
 public class CommandLineApp {
 
-    private static final String VERSION = "0.3-alpha";
+    private static final String VERSION = "0.4-alpha";
 
     public static void main(String[] args ) throws IOException {
         System.out.println("Geco File Organizer v." + VERSION);
