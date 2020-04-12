@@ -34,7 +34,10 @@ public class DirectoryTree {
             for (File file : files) {
                 if (file.isDirectory()) {
                     printDirectoryTree(file, indent + 1, sb);
-                } else {
+                }
+            }
+            for (File file : files) {
+                if (file.isFile()) {
                     printFile(file, indent + 1, sb);
                 }
             }
