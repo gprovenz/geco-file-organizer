@@ -99,13 +99,13 @@ class FileCopierTest {
                 "|  |  |  |  |  |  |  |  +--IMG_4.JPG\n" +
                 "|  |  |  |  |  |  |  |  +--IMG_5.JPG\n" +
                 "|  |  |  +--source\n" +
-                "|  |  |  |  +--doc_1.txt\n" +
-                "|  |  |  |  +--doc_2.txt\n" +
                 "|  |  |  |  +--IMG_1.JPG\n" +
                 "|  |  |  |  +--IMG_2.JPG\n" +
                 "|  |  |  |  +--IMG_3.JPG\n" +
                 "|  |  |  |  +--IMG_4.JPG\n" +
-                "|  |  |  |  +--IMG_5.JPG\n", tree);
+                "|  |  |  |  +--IMG_5.JPG\n" +
+                "|  |  |  |  +--doc_1.txt\n" +
+                "|  |  |  |  +--doc_2.txt\n", tree);
 
 
     }
@@ -141,16 +141,16 @@ class FileCopierTest {
                 "|  |  |  |  |  |  |  |  +--IMG_4.JPG\n" +
                 "|  |  |  |  |  |  |  |  +--IMG_5.JPG\n" +
                 "|  |  |  +--source\n" +
-                "|  |  |  |  +--doc_1.txt\n" +
-                "|  |  |  |  +--doc_2.txt\n" +
-                "|  |  |  |  +--duplicates\n" +
-                "|  |  |  |  |  +--IMG_1.JPG\n" +
-                "|  |  |  |  |  +--IMG_2.JPG\n" +
                 "|  |  |  |  +--IMG_1.JPG\n" +
                 "|  |  |  |  +--IMG_2.JPG\n" +
                 "|  |  |  |  +--IMG_3.JPG\n" +
                 "|  |  |  |  +--IMG_4.JPG\n" +
-                "|  |  |  |  +--IMG_5.JPG\n", tree);
+                "|  |  |  |  +--IMG_5.JPG\n" +
+                "|  |  |  |  +--doc_1.txt\n" +
+                "|  |  |  |  +--doc_2.txt\n" +
+                "|  |  |  |  +--duplicates\n" +
+                "|  |  |  |  |  +--IMG_1.JPG\n" +
+                "|  |  |  |  |  +--IMG_2.JPG\n", tree);
     }
 
 

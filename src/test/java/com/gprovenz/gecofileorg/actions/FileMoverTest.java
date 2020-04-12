@@ -138,10 +138,10 @@ class FileMoverTest {
                 "|  |  |  |  |  |  |  |  +--IMG_4.JPG\n" +
                 "|  |  |  |  |  |  |  |  +--IMG_5.JPG\n" +
                 "|  |  |  +--source\n" +
-                "|  |  |  |  +--doc_1.txt\n" +
-                "|  |  |  |  +--doc_2.txt\n" +
                 "|  |  |  |  +--IMG_1.JPG\n" +
-                "|  |  |  |  +--IMG_2.JPG\n", tree);
+                "|  |  |  |  +--IMG_2.JPG\n" +
+                "|  |  |  |  +--doc_1.txt\n" +
+                "|  |  |  |  +--doc_2.txt\n", tree);
     }
 
     @Test
@@ -198,8 +198,6 @@ class FileMoverTest {
 
         assertEquals("|  |  +--" + tempDir.getName() + "\n" +
                 "|  |  |  +--source\n" +
-                "|  |  |  |  +--doc_1.txt\n" +
-                "|  |  |  |  +--doc_2.txt\n" +
                 "|  |  |  |  +--Photo\n" +
                 "|  |  |  |  |  +--2017\n" +
                 "|  |  |  |  |  |  +--08-August-2017\n" +
@@ -212,6 +210,8 @@ class FileMoverTest {
                 "|  |  |  |  |  |  +--05-May-2018\n" +
                 "|  |  |  |  |  |  |  +--26-May-2018\n" +
                 "|  |  |  |  |  |  |  |  +--IMG_4.JPG\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_5.JPG\n", tree);
+                "|  |  |  |  |  |  |  |  +--IMG_5.JPG\n" +
+                "|  |  |  |  +--doc_1.txt\n" +
+                "|  |  |  |  +--doc_2.txt\n", tree);
     }
 }
