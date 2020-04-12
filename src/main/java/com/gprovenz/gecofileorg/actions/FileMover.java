@@ -21,12 +21,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import static com.gprovenz.gecofileorg.log.LogMessage.*;
+
 public class FileMover {
     public static final int THREADS = 4;
 
     private final Settings settings;
     private int moved;
-    private Logger logger = LogManager.getLogger();
+    private final Logger logger = LogManager.getLogger();
 
     public FileMover(Settings settings) {
         this.settings = settings;
@@ -36,7 +38,6 @@ public class FileMover {
         moved = 0;
 
         ExecutorService executor = Executors.newFixedThreadPool(THREADS);
-
         List<Future<Boolean>> futures = new ArrayList<>();
 
         File outPath = new File (settings.getDestinationPath());
@@ -44,10 +45,10 @@ public class FileMover {
 
         Files.walk(Paths.get(settings.getSourcePath()))
                 .map(Path::toFile)
-                .filter(f -> f.isFile())
+                .filter(File::isFile)
                 .forEach(f -> moveFile(settings, f, outPath, executor, futures));
 
-        logger.info("Cleaning up...");
+        logger.debug("Cleaning up...");
         for (Future<Boolean> f:futures) {
             try {
                 f.get();
@@ -65,57 +66,72 @@ public class FileMover {
         logger.info("{} files moved successfully", moved);
     }
 
-    private boolean moveFile(Settings settings, File sourceFile, File destinationPath, ExecutorService executor, List<Future<Boolean>> futures) {
+    private void moveFile(Settings settings, File sourceFile, File destinationPath, ExecutorService executor, List<Future<Boolean>> futures) {
         Optional<FileInfo> fileInfo;
         try {
             fileInfo = FileInfo.getInstance(settings, sourceFile);
+            if (!fileInfo.isPresent()) {
+                return;
+            }
         } catch (IOException e) {
             logger.error("Cannot read file " + sourceFile.getAbsolutePath(), e);
-            return false;
+            return;
         }
-        if (FileTools.isToIgnore(fileInfo))  {
+        if (FileTools.isToIgnore(fileInfo.get()))  {
             logger.debug("Ignoring file {}", sourceFile.getAbsolutePath());
-            return false;
+            return;
         }
 
-        File destFile = PathBuilder.buildDestPath(settings, destinationPath, fileInfo.get());
+        File destFile = PathBuilder.buildDestPath(settings,
+                destinationPath,
+                fileInfo.get());
 
         if (sourceFile.equals(destFile)) {
             logger.debug("Skipping moving same file {} -> {}", sourceFile.getAbsolutePath(), destFile.getAbsolutePath());
-            return false;
+            return;
         }
 
         if (!destFile.exists()) {
-            new File(destFile.getParent()).mkdirs();
             try {
+                File destParent = new File(destFile.getParent());
+                if (destParent.mkdirs()) {
+                    logger.debug("Creating directory {}", destParent);
+                }
+
                 FileUtils.moveFile(sourceFile, destFile);
+                logMoved(sourceFile, destFile);
             } catch (IOException e) {
                 logger.error("Error moving file " + sourceFile.getAbsolutePath() + " to " + destinationPath, e);
-                return false;
+                return;
             }
-            logger.info("File {} moved to {}", sourceFile.getName(), destFile.getAbsolutePath());
+            logger.debug("File {} moved to {}", sourceFile.getName(), destFile.getAbsolutePath());
             moved++;
-            return true;
         } else {
             futures.add(executor.submit(() -> {
                 try {
                     if (FileTools.sameContent(settings, sourceFile, destFile)) {
-                        logger.info("File {} already exists in path {}", sourceFile.getName(), destFile.getAbsolutePath());
+                        logger.debug("File {} already exists in path {}", sourceFile.getName(), destFile.getAbsolutePath());
                         if (settings.isRemoveDuplicates()) {
-                            sourceFile.delete();
-                            return true;
+                            final boolean delete = sourceFile.delete();
+                            if (delete) {
+                                logRemovedDuplicate(sourceFile, destFile);
+                                return true;
+                            } else {
+                                logIgnoredDuplicate(sourceFile, destFile);
+                            }
+                        } else {
+                            logIgnoredDuplicate(sourceFile, destFile);
                         }
                     } else {
-                        logger.warn("File {} already exists in path {}, but it has different content", sourceFile.getName(), destFile.getAbsolutePath());
+                        logDifferentContent(sourceFile, destFile);
                     }
                 } catch (IOException e) {
-                    logger.error("Cannot delete source file {}: {}", sourceFile.getAbsolutePath(), e.getMessage());
+                    logger.error("Cannot delete source file {}", sourceFile.getAbsolutePath(), e);
 
                 }
                 return false;
             }));
         }
 
-        return false;
     }
 }

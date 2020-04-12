@@ -16,7 +16,7 @@ public class CommandLineApp {
 
     private static final String VERSION = "0.3-alpha";
 
-    public static void main(String[] args ) throws IOException, InterruptedException {
+    public static void main(String[] args ) throws IOException {
         System.out.println("Geco File Organizer v." + VERSION);
         if (args.length<1) {
             System.out.println("Please specify settings file.");
@@ -26,7 +26,7 @@ public class CommandLineApp {
         execCommand(settings);
     }
 
-    protected static void execCommand(Settings settings) throws IOException, InterruptedException {
+    public static void execCommand(Settings settings) throws IOException {
         if (settings.getOperation()== Options.Operation.MOVE) {
             FileMover mover = new FileMover(settings);
             mover.moveAllFiles();

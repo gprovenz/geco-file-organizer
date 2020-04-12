@@ -11,15 +11,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.Optional;
 
 public class FileTools {
     private static Logger logger = LogManager.getLogger();
 
-    public static boolean isToIgnore(Optional<FileInfo> fileInfo) {
-        return !fileInfo.isPresent() ||
-                !fileInfo.get().getFileType().isPresent() ||
-                fileInfo.get().getFileType().get().isIgnore();
+    public static boolean isToIgnore(FileInfo fileInfo) {
+        return  !fileInfo.getFileType().isPresent() ||
+                fileInfo.getFileType().get().isIgnore();
     }
 
     public static void removeEmptyFolders(String folderPath) throws IOException {
@@ -29,15 +29,15 @@ public class FileTools {
         Files.walk(Paths.get(folderPath))
                 .sorted(Comparator.reverseOrder())
                 .map(Path::toFile)
-                .filter(f -> f.isDirectory())
-                .forEach(e -> deleteEmptyDir(e));
+                .filter(File::isDirectory)
+                .forEach(FileTools::deleteEmptyDir);
     }
 
     private static boolean deleteEmptyDir(File dir) {
         if (!dir.isDirectory()) {
             throw new IllegalArgumentException("Can delete only folders");
         }
-        if (dir.listFiles().length>0) {
+        if (dir.listFiles()==null || Objects.requireNonNull(dir.listFiles()).length>0) {
             return false;
         }
         return dir.delete();

@@ -18,12 +18,15 @@ public class PathBuilder {
         String monthShort = c.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
 
         String path = settings.getDestinationPathStructure()
-                .replace("${file_type}", fileInfo.getFileType().get().getFileType())
                 .replace("${year}", String.valueOf(year))
                 .replace("${month}", String.format("%02d", month))
                 .replace("${day}", String.format("%02d", day))
                 .replace("${month_name}", String.valueOf(monthLong))
                 .replace("${month_name_short}", String.valueOf(monthShort));
+
+        if (fileInfo.getFileType().isPresent()) {
+            path = path.replace("${file_type}", fileInfo.getFileType().get().getFileType());
+        }
 
         return new File(new File(parent, path), fileInfo.getFileName());
     }

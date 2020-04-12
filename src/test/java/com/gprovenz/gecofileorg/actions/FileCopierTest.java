@@ -23,7 +23,7 @@ import static org.apache.commons.io.FileUtils.copyFileToDirectory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class FileMoverTest {
+class FileCopierTest {
     private static final List<String> files = new ArrayList<>();
     private static final Logger logger = LogManager.getLogger();
     private File tempDir;
@@ -44,7 +44,7 @@ class FileMoverTest {
 
     @BeforeEach
     public void initEachTest() throws IOException {
-        ClassLoader classLoader = FileMoverTest.class.getClassLoader();
+        ClassLoader classLoader = FileCopierTest.class.getClassLoader();
 
         tempDir = Files.createTempDirectory("testCopy").toFile();
         logger.info("Created temp directory: {}", tempDir);
@@ -60,7 +60,7 @@ class FileMoverTest {
         }
         logger.info("Test files copied to test dir {} files: {}", sourceDir, files);
 
-        File settingsFile = new File(Objects.requireNonNull(classLoader.getResource("conf/test-move-1.json")).getFile());
+        File settingsFile = new File(Objects.requireNonNull(classLoader.getResource("conf/test-copy-1.json")).getFile());
         settings = SettingsReader.read(settingsFile);
         settings.setSourcePath(sourceDir.getAbsolutePath());
 
@@ -75,49 +75,10 @@ class FileMoverTest {
     }
 
     @Test
-    public void givenUniqueFilesThenMoved() throws IOException {
+    public void givenUniqueFilesThenCopied() throws IOException {
         CommandLineApp.execCommand(settings);
         assertTrue(destDir.exists());
 
-        assertTrue(new File(destDir, "Photo").exists());
-
-        String tree = DirectoryTree.getTree(tempDir);
-
-        assertEquals("|  |  +--" + tempDir.getName() + "\n" +
-                "|  |  |  +--dest\n" +
-                "|  |  |  |  +--Photo\n" +
-                "|  |  |  |  |  +--2017\n" +
-                "|  |  |  |  |  |  +--08-August-2017\n" +
-                "|  |  |  |  |  |  |  +--11-Aug-2017\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_2.JPG\n" +
-                "|  |  |  |  |  |  |  +--15-Aug-2017\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_1.JPG\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_3.JPG\n" +
-                "|  |  |  |  |  +--2018\n" +
-                "|  |  |  |  |  |  +--05-May-2018\n" +
-                "|  |  |  |  |  |  |  +--26-May-2018\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_4.JPG\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_5.JPG\n" +
-                "|  |  |  +--source\n" +
-                "|  |  |  |  +--doc_1.txt\n" +
-                "|  |  |  |  +--doc_2.txt\n", tree);
-
-
-    }
-
-    @Test
-    public void givenDuplicateFilesThenMoved() throws IOException {
-        // change settings to don't delete duplicates
-        settings.setRemoveDuplicates(false);
-
-        // create 2 duplicate files
-        File subfolder = new File(sourceDir, "duplicates");
-        assertTrue(subfolder.mkdirs());
-        FileUtils.copyFileToDirectory(new File(sourceDir, "IMG_1.JPG"), subfolder);
-        FileUtils.copyFileToDirectory(new File(sourceDir, "IMG_2.JPG"), subfolder);
-
-        CommandLineApp.execCommand(settings);
-        assertTrue(destDir.exists());
         assertTrue(new File(destDir, "Photo").exists());
 
         String tree = DirectoryTree.getTree(tempDir);
@@ -141,13 +102,16 @@ class FileMoverTest {
                 "|  |  |  |  +--doc_1.txt\n" +
                 "|  |  |  |  +--doc_2.txt\n" +
                 "|  |  |  |  +--IMG_1.JPG\n" +
-                "|  |  |  |  +--IMG_2.JPG\n", tree);
+                "|  |  |  |  +--IMG_2.JPG\n" +
+                "|  |  |  |  +--IMG_3.JPG\n" +
+                "|  |  |  |  +--IMG_4.JPG\n" +
+                "|  |  |  |  +--IMG_5.JPG\n", tree);
+
+
     }
 
     @Test
-    public void givenDuplicateFilesThenMovedWithNoDuplicates() throws IOException {
-        // settings are configured to delete duplicates
-
+    public void givenDuplicateFilesThenCopied() throws IOException {
         // create 2 duplicate files
         File subfolder = new File(sourceDir, "duplicates");
         assertTrue(subfolder.mkdirs());
@@ -178,40 +142,16 @@ class FileMoverTest {
                 "|  |  |  |  |  |  |  |  +--IMG_5.JPG\n" +
                 "|  |  |  +--source\n" +
                 "|  |  |  |  +--doc_1.txt\n" +
-                "|  |  |  |  +--doc_2.txt\n", tree);
-    }
-
-    @Test
-    public void givenSourceFolderMatchDestinationFolderThenOrganized() throws IOException {
-        // settings are configured to delete duplicates
-        settings.setDestinationPath(settings.getSourcePath());
-
-        // create 2 duplicate files
-        File subfolder = new File(sourceDir, "duplicates");
-        assertTrue(subfolder.mkdirs());
-        FileUtils.copyFileToDirectory(new File(sourceDir, "IMG_1.JPG"), subfolder);
-        FileUtils.copyFileToDirectory(new File(sourceDir, "IMG_2.JPG"), subfolder);
-
-        CommandLineApp.execCommand(settings);
-
-        String tree = DirectoryTree.getTree(tempDir);
-
-        assertEquals("|  |  +--" + tempDir.getName() + "\n" +
-                "|  |  |  +--source\n" +
-                "|  |  |  |  +--doc_1.txt\n" +
                 "|  |  |  |  +--doc_2.txt\n" +
-                "|  |  |  |  +--Photo\n" +
-                "|  |  |  |  |  +--2017\n" +
-                "|  |  |  |  |  |  +--08-August-2017\n" +
-                "|  |  |  |  |  |  |  +--11-Aug-2017\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_2.JPG\n" +
-                "|  |  |  |  |  |  |  +--15-Aug-2017\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_1.JPG\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_3.JPG\n" +
-                "|  |  |  |  |  +--2018\n" +
-                "|  |  |  |  |  |  +--05-May-2018\n" +
-                "|  |  |  |  |  |  |  +--26-May-2018\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_4.JPG\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_5.JPG\n", tree);
+                "|  |  |  |  +--duplicates\n" +
+                "|  |  |  |  |  +--IMG_1.JPG\n" +
+                "|  |  |  |  |  +--IMG_2.JPG\n" +
+                "|  |  |  |  +--IMG_1.JPG\n" +
+                "|  |  |  |  +--IMG_2.JPG\n" +
+                "|  |  |  |  +--IMG_3.JPG\n" +
+                "|  |  |  |  +--IMG_4.JPG\n" +
+                "|  |  |  |  +--IMG_5.JPG\n", tree);
     }
+
+
 }
