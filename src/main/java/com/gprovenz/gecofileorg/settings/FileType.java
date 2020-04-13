@@ -15,6 +15,8 @@ public class FileType {
     private boolean readExifMetadata;
 
     private boolean ignore;
+    private FileSize minSize;
+    private FileSize maxSize;
 
     public List<String> getExtensions() {
         return extensions;
