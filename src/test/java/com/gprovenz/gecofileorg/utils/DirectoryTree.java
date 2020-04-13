@@ -15,7 +15,7 @@ public class DirectoryTree {
 
     public static String getTree(File root) {
         StringBuilder sb = new StringBuilder();
-        printDirectoryTree(root, 2, sb);
+        printDirectoryTree(root, 0, sb);
         return sb.toString();
     }
 

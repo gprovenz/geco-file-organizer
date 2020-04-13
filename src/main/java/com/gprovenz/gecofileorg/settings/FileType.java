@@ -16,19 +16,57 @@ public class FileType {
 
     private boolean ignore;
 
+    @JsonProperty("min_size")
+    private FileSize minSize;
+
+    @JsonProperty("max_size")
+    private FileSize maxSize;
+
     public List<String> getExtensions() {
         return extensions;
+    }
+
+    public void setExtensions(List<String> extensions) {
+        this.extensions = extensions;
     }
 
     public String getFileType() {
         return fileType;
     }
 
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
+
     public boolean isReadExifMetadata() {
         return readExifMetadata;
     }
 
+    public void setReadExifMetadata(boolean readExifMetadata) {
+        this.readExifMetadata = readExifMetadata;
+    }
+
     public boolean isIgnore() {
         return ignore;
+    }
+
+    public void setIgnore(boolean ignore) {
+        this.ignore = ignore;
+    }
+
+    public FileSize getMinSize() {
+        return minSize;
+    }
+
+    public void setMinSize(FileSize minSize) {
+        this.minSize = minSize;
+    }
+
+    public FileSize getMaxSize() {
+        return maxSize;
+    }
+
+    public void setMaxSize(FileSize maxSize) {
+        this.maxSize = maxSize;
     }
 }

@@ -79,33 +79,33 @@ class FileCopierTest {
         CommandLineApp.execCommand(settings);
         assertTrue(destDir.exists());
 
-        assertTrue(new File(destDir, "Photo").exists());
+        assertTrue(new File(destDir, "Photos").exists());
 
         String tree = DirectoryTree.getTree(tempDir);
 
-        assertEquals("|  |  +--" + tempDir.getName() + "\n" +
-                "|  |  |  +--dest\n" +
-                "|  |  |  |  +--Photo\n" +
-                "|  |  |  |  |  +--2017\n" +
-                "|  |  |  |  |  |  +--08-August-2017\n" +
-                "|  |  |  |  |  |  |  +--11-Aug-2017\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_2.JPG\n" +
-                "|  |  |  |  |  |  |  +--15-Aug-2017\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_1.JPG\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_3.JPG\n" +
-                "|  |  |  |  |  +--2018\n" +
-                "|  |  |  |  |  |  +--05-May-2018\n" +
-                "|  |  |  |  |  |  |  +--26-May-2018\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_4.JPG\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_5.JPG\n" +
-                "|  |  |  +--source\n" +
-                "|  |  |  |  +--IMG_1.JPG\n" +
-                "|  |  |  |  +--IMG_2.JPG\n" +
-                "|  |  |  |  +--IMG_3.JPG\n" +
-                "|  |  |  |  +--IMG_4.JPG\n" +
-                "|  |  |  |  +--IMG_5.JPG\n" +
-                "|  |  |  |  +--doc_1.txt\n" +
-                "|  |  |  |  +--doc_2.txt\n", tree);
+        assertEquals("+--" + tempDir.getName() + "\n" +
+                "|  +--dest\n" +
+                "|  |  +--Photos\n" +
+                "|  |  |  +--2017\n" +
+                "|  |  |  |  +--08-August-2017\n" +
+                "|  |  |  |  |  +--11-Aug-2017\n" +
+                "|  |  |  |  |  |  +--IMG_2.JPG\n" +
+                "|  |  |  |  |  +--15-Aug-2017\n" +
+                "|  |  |  |  |  |  +--IMG_1.JPG\n" +
+                "|  |  |  |  |  |  +--IMG_3.JPG\n" +
+                "|  |  |  +--2018\n" +
+                "|  |  |  |  +--05-May-2018\n" +
+                "|  |  |  |  |  +--26-May-2018\n" +
+                "|  |  |  |  |  |  +--IMG_4.JPG\n" +
+                "|  |  |  |  |  |  +--IMG_5.JPG\n" +
+                "|  +--source\n" +
+                "|  |  +--IMG_1.JPG\n" +
+                "|  |  +--IMG_2.JPG\n" +
+                "|  |  +--IMG_3.JPG\n" +
+                "|  |  +--IMG_4.JPG\n" +
+                "|  |  +--IMG_5.JPG\n" +
+                "|  |  +--doc_1.txt\n" +
+                "|  |  +--doc_2.txt\n", tree);
 
 
     }
@@ -121,36 +121,36 @@ class FileCopierTest {
         CommandLineApp.execCommand(settings);
         assertTrue(destDir.exists());
 
-        assertTrue(new File(destDir, "Photo").exists());
+        assertTrue(new File(destDir, "Photos").exists());
 
         String tree = DirectoryTree.getTree(tempDir);
 
-        assertEquals("|  |  +--" + tempDir.getName() + "\n" +
-                        "|  |  |  +--dest\n" +
-                        "|  |  |  |  +--Photo\n" +
-                        "|  |  |  |  |  +--2017\n" +
-                        "|  |  |  |  |  |  +--08-August-2017\n" +
-                        "|  |  |  |  |  |  |  +--11-Aug-2017\n" +
-                        "|  |  |  |  |  |  |  |  +--IMG_2.JPG\n" +
-                        "|  |  |  |  |  |  |  +--15-Aug-2017\n" +
-                        "|  |  |  |  |  |  |  |  +--IMG_1.JPG\n" +
-                        "|  |  |  |  |  |  |  |  +--IMG_3.JPG\n" +
-                        "|  |  |  |  |  +--2018\n" +
-                        "|  |  |  |  |  |  +--05-May-2018\n" +
-                        "|  |  |  |  |  |  |  +--26-May-2018\n" +
-                        "|  |  |  |  |  |  |  |  +--IMG_4.JPG\n" +
-                        "|  |  |  |  |  |  |  |  +--IMG_5.JPG\n" +
-                        "|  |  |  +--source\n" +
-                        "|  |  |  |  +--duplicates\n" +
-                        "|  |  |  |  |  +--IMG_1.JPG\n" +
-                        "|  |  |  |  |  +--IMG_2.JPG\n" +
-                        "|  |  |  |  +--IMG_1.JPG\n" +
-                        "|  |  |  |  +--IMG_2.JPG\n" +
-                        "|  |  |  |  +--IMG_3.JPG\n" +
-                        "|  |  |  |  +--IMG_4.JPG\n" +
-                        "|  |  |  |  +--IMG_5.JPG\n" +
-                        "|  |  |  |  +--doc_1.txt\n" +
-                        "|  |  |  |  +--doc_2.txt\n", tree);
+        assertEquals("+--" + tempDir.getName() + "\n" +
+                        "|  +--dest\n" +
+                        "|  |  +--Photos\n" +
+                        "|  |  |  +--2017\n" +
+                        "|  |  |  |  +--08-August-2017\n" +
+                        "|  |  |  |  |  +--11-Aug-2017\n" +
+                        "|  |  |  |  |  |  +--IMG_2.JPG\n" +
+                        "|  |  |  |  |  +--15-Aug-2017\n" +
+                        "|  |  |  |  |  |  +--IMG_1.JPG\n" +
+                        "|  |  |  |  |  |  +--IMG_3.JPG\n" +
+                        "|  |  |  +--2018\n" +
+                        "|  |  |  |  +--05-May-2018\n" +
+                        "|  |  |  |  |  +--26-May-2018\n" +
+                        "|  |  |  |  |  |  +--IMG_4.JPG\n" +
+                        "|  |  |  |  |  |  +--IMG_5.JPG\n" +
+                        "|  +--source\n" +
+                        "|  |  +--duplicates\n" +
+                        "|  |  |  +--IMG_1.JPG\n" +
+                        "|  |  |  +--IMG_2.JPG\n" +
+                        "|  |  +--IMG_1.JPG\n" +
+                        "|  |  +--IMG_2.JPG\n" +
+                        "|  |  +--IMG_3.JPG\n" +
+                        "|  |  +--IMG_4.JPG\n" +
+                        "|  |  +--IMG_5.JPG\n" +
+                        "|  |  +--doc_1.txt\n" +
+                        "|  |  +--doc_2.txt\n", tree);
     }
 
 

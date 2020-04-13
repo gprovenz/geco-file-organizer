@@ -59,11 +59,13 @@ class FileMoverTest {
             copyFileToDirectory(srcFile, sourceDir);
         }
         logger.info("Test files copied to test dir {} files: {}", sourceDir, files);
+    }
 
-        File settingsFile = new File(Objects.requireNonNull(classLoader.getResource("conf/test-move-1.json")).getFile());
+    private void loadSettingsFile(String settingsJSON) throws IOException {
+        ClassLoader classLoader = FileMoverTest.class.getClassLoader();
+        File settingsFile = new File(Objects.requireNonNull(classLoader.getResource(settingsJSON)).getFile());
         settings = SettingsReader.read(settingsFile);
         settings.setSourcePath(sourceDir.getAbsolutePath());
-
         settings.setDestinationPath(destDir.getAbsolutePath());
         logger.info("Test settings file read: {}", settingsFile);
     }
@@ -76,37 +78,41 @@ class FileMoverTest {
 
     @Test
     public void givenUniqueFilesThenMoved() throws IOException {
+        loadSettingsFile("conf/test-move-1.json");
+
         CommandLineApp.execCommand(settings);
         assertTrue(destDir.exists());
 
-        assertTrue(new File(destDir, "Photo").exists());
+        assertTrue(new File(destDir, "Photos").exists());
 
         String tree = DirectoryTree.getTree(tempDir);
 
-        assertEquals("|  |  +--" + tempDir.getName() + "\n" +
-                "|  |  |  +--dest\n" +
-                "|  |  |  |  +--Photo\n" +
-                "|  |  |  |  |  +--2017\n" +
-                "|  |  |  |  |  |  +--08-August-2017\n" +
-                "|  |  |  |  |  |  |  +--11-Aug-2017\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_2.JPG\n" +
-                "|  |  |  |  |  |  |  +--15-Aug-2017\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_1.JPG\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_3.JPG\n" +
-                "|  |  |  |  |  +--2018\n" +
-                "|  |  |  |  |  |  +--05-May-2018\n" +
-                "|  |  |  |  |  |  |  +--26-May-2018\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_4.JPG\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_5.JPG\n" +
-                "|  |  |  +--source\n" +
-                "|  |  |  |  +--doc_1.txt\n" +
-                "|  |  |  |  +--doc_2.txt\n", tree);
+        assertEquals("+--" + tempDir.getName() + "\n" +
+                "|  +--dest\n" +
+                "|  |  +--Photos\n" +
+                "|  |  |  +--2017\n" +
+                "|  |  |  |  +--08-August-2017\n" +
+                "|  |  |  |  |  +--11-Aug-2017\n" +
+                "|  |  |  |  |  |  +--IMG_2.JPG\n" +
+                "|  |  |  |  |  +--15-Aug-2017\n" +
+                "|  |  |  |  |  |  +--IMG_1.JPG\n" +
+                "|  |  |  |  |  |  +--IMG_3.JPG\n" +
+                "|  |  |  +--2018\n" +
+                "|  |  |  |  +--05-May-2018\n" +
+                "|  |  |  |  |  +--26-May-2018\n" +
+                "|  |  |  |  |  |  +--IMG_4.JPG\n" +
+                "|  |  |  |  |  |  +--IMG_5.JPG\n" +
+                "|  +--source\n" +
+                "|  |  +--doc_1.txt\n" +
+                "|  |  +--doc_2.txt\n", tree);
 
 
     }
 
     @Test
     public void givenDuplicateFilesThenMoved() throws IOException {
+        loadSettingsFile("conf/test-move-1.json");
+
         // change settings to don't delete duplicates
         settings.setRemoveDuplicates(false);
 
@@ -118,26 +124,26 @@ class FileMoverTest {
 
         CommandLineApp.execCommand(settings);
         assertTrue(destDir.exists());
-        assertTrue(new File(destDir, "Photo").exists());
+        assertTrue(new File(destDir, "Photos").exists());
 
         String tree = DirectoryTree.getTree(tempDir);
 
-        assertTrue(tree.startsWith("|  |  +--" + tempDir.getName() + "\n" +
-                "|  |  |  +--dest\n" +
-                "|  |  |  |  +--Photo\n" +
-                "|  |  |  |  |  +--2017\n" +
-                "|  |  |  |  |  |  +--08-August-2017\n" +
-                "|  |  |  |  |  |  |  +--11-Aug-2017\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_2.JPG\n" +
-                "|  |  |  |  |  |  |  +--15-Aug-2017\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_1.JPG\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_3.JPG\n" +
-                "|  |  |  |  |  +--2018\n" +
-                "|  |  |  |  |  |  +--05-May-2018\n" +
-                "|  |  |  |  |  |  |  +--26-May-2018\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_4.JPG\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_5.JPG\n" +
-                "|  |  |  +--source\n"));
+        assertTrue(tree.startsWith("+--" + tempDir.getName() + "\n" +
+                "|  +--dest\n" +
+                "|  |  +--Photos\n" +
+                "|  |  |  +--2017\n" +
+                "|  |  |  |  +--08-August-2017\n" +
+                "|  |  |  |  |  +--11-Aug-2017\n" +
+                "|  |  |  |  |  |  +--IMG_2.JPG\n" +
+                "|  |  |  |  |  +--15-Aug-2017\n" +
+                "|  |  |  |  |  |  +--IMG_1.JPG\n" +
+                "|  |  |  |  |  |  +--IMG_3.JPG\n" +
+                "|  |  |  +--2018\n" +
+                "|  |  |  |  +--05-May-2018\n" +
+                "|  |  |  |  |  +--26-May-2018\n" +
+                "|  |  |  |  |  |  +--IMG_4.JPG\n" +
+                "|  |  |  |  |  |  +--IMG_5.JPG\n" +
+                "|  +--source\n"));
 
         int index = tree.indexOf("+--source");
         assertTrue(tree.indexOf("IMG_1.JPG", index)>0);
@@ -148,7 +154,7 @@ class FileMoverTest {
 
     @Test
     public void givenDuplicateFilesThenMovedWithNoDuplicates() throws IOException {
-        // settings are configured to delete duplicates
+        loadSettingsFile("conf/test-move-1.json");
 
         // create 2 duplicate files
         File subfolder = new File(sourceDir, "duplicates");
@@ -159,33 +165,33 @@ class FileMoverTest {
         CommandLineApp.execCommand(settings);
         assertTrue(destDir.exists());
 
-        assertTrue(new File(destDir, "Photo").exists());
+        assertTrue(new File(destDir, "Photos").exists());
 
         String tree = DirectoryTree.getTree(tempDir);
 
-        assertEquals("|  |  +--" + tempDir.getName() + "\n" +
-                "|  |  |  +--dest\n" +
-                "|  |  |  |  +--Photo\n" +
-                "|  |  |  |  |  +--2017\n" +
-                "|  |  |  |  |  |  +--08-August-2017\n" +
-                "|  |  |  |  |  |  |  +--11-Aug-2017\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_2.JPG\n" +
-                "|  |  |  |  |  |  |  +--15-Aug-2017\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_1.JPG\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_3.JPG\n" +
-                "|  |  |  |  |  +--2018\n" +
-                "|  |  |  |  |  |  +--05-May-2018\n" +
-                "|  |  |  |  |  |  |  +--26-May-2018\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_4.JPG\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_5.JPG\n" +
-                "|  |  |  +--source\n" +
-                "|  |  |  |  +--doc_1.txt\n" +
-                "|  |  |  |  +--doc_2.txt\n", tree);
+        assertEquals("+--" + tempDir.getName() + "\n" +
+                "|  +--dest\n" +
+                "|  |  +--Photos\n" +
+                "|  |  |  +--2017\n" +
+                "|  |  |  |  +--08-August-2017\n" +
+                "|  |  |  |  |  +--11-Aug-2017\n" +
+                "|  |  |  |  |  |  +--IMG_2.JPG\n" +
+                "|  |  |  |  |  +--15-Aug-2017\n" +
+                "|  |  |  |  |  |  +--IMG_1.JPG\n" +
+                "|  |  |  |  |  |  +--IMG_3.JPG\n" +
+                "|  |  |  +--2018\n" +
+                "|  |  |  |  +--05-May-2018\n" +
+                "|  |  |  |  |  +--26-May-2018\n" +
+                "|  |  |  |  |  |  +--IMG_4.JPG\n" +
+                "|  |  |  |  |  |  +--IMG_5.JPG\n" +
+                "|  +--source\n" +
+                "|  |  +--doc_1.txt\n" +
+                "|  |  +--doc_2.txt\n", tree);
     }
 
     @Test
     public void givenSourceFolderMatchDestinationFolderThenOrganized() throws IOException {
-        // settings are configured to delete duplicates
+        loadSettingsFile("conf/test-move-1.json");
         settings.setDestinationPath(settings.getSourcePath());
 
         // create 2 duplicate files
@@ -198,22 +204,49 @@ class FileMoverTest {
 
         String tree = DirectoryTree.getTree(tempDir);
 
-        assertEquals("|  |  +--" + tempDir.getName() + "\n" +
-                "|  |  |  +--source\n" +
-                "|  |  |  |  +--Photo\n" +
-                "|  |  |  |  |  +--2017\n" +
-                "|  |  |  |  |  |  +--08-August-2017\n" +
-                "|  |  |  |  |  |  |  +--11-Aug-2017\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_2.JPG\n" +
-                "|  |  |  |  |  |  |  +--15-Aug-2017\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_1.JPG\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_3.JPG\n" +
-                "|  |  |  |  |  +--2018\n" +
-                "|  |  |  |  |  |  +--05-May-2018\n" +
-                "|  |  |  |  |  |  |  +--26-May-2018\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_4.JPG\n" +
-                "|  |  |  |  |  |  |  |  +--IMG_5.JPG\n" +
-                "|  |  |  |  +--doc_1.txt\n" +
-                "|  |  |  |  +--doc_2.txt\n", tree);
+        assertEquals("+--" + tempDir.getName() + "\n" +
+                "|  +--source\n" +
+                "|  |  +--Photos\n" +
+                "|  |  |  +--2017\n" +
+                "|  |  |  |  +--08-August-2017\n" +
+                "|  |  |  |  |  +--11-Aug-2017\n" +
+                "|  |  |  |  |  |  +--IMG_2.JPG\n" +
+                "|  |  |  |  |  +--15-Aug-2017\n" +
+                "|  |  |  |  |  |  +--IMG_1.JPG\n" +
+                "|  |  |  |  |  |  +--IMG_3.JPG\n" +
+                "|  |  |  +--2018\n" +
+                "|  |  |  |  +--05-May-2018\n" +
+                "|  |  |  |  |  +--26-May-2018\n" +
+                "|  |  |  |  |  |  +--IMG_4.JPG\n" +
+                "|  |  |  |  |  |  +--IMG_5.JPG\n" +
+                "|  |  +--doc_1.txt\n" +
+                "|  |  +--doc_2.txt\n", tree);
     }
+
+    @Test
+    void givenSizeOptionsThenMoved() throws IOException {
+        loadSettingsFile("conf/test-move-size.json");
+
+        CommandLineApp.execCommand(settings);
+
+        String tree = DirectoryTree.getTree(tempDir);
+
+        assertEquals("+--" + tempDir.getName() + "\n" +
+                "|  +--dest\n" +
+                "|  |  +--Images\n" +
+                "|  |  |  +--2017\n" +
+                "|  |  |  |  +--IMG_2.JPG\n" +
+                "|  |  |  +--2018\n" +
+                "|  |  |  |  +--IMG_5.JPG\n" +
+                "|  |  +--Photos\n" +
+                "|  |  |  +--2017\n" +
+                "|  |  |  |  +--IMG_1.JPG\n" +
+                "|  |  |  |  +--IMG_3.JPG\n" +
+                "|  |  |  +--2018\n" +
+                "|  |  |  |  +--IMG_4.JPG\n" +
+                "|  +--source\n" +
+                "|  |  +--doc_1.txt\n" +
+                "|  |  +--doc_2.txt\n", tree);
+    }
+
 }
