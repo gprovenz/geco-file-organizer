@@ -103,16 +103,33 @@ public class FileInfo {
         return Optional.of(fileInfo);
     }
 
-    private static Optional<FileType> getFileType(Settings settings, File file) {
-        final String fileName = file.getName().toLowerCase();
+    private static Optional<FileType> getFileType(Settings settings, File file) throws IOException {
         for (FileType fileType:settings.getFileTypes()) {
-            for (String ext:fileType.getExtensions()) {
-                if (fileName.endsWith("." + ext)) {
-                    return Optional.of(fileType);
-                }
+            if (matchesFileType(file, fileType)) {
+                return Optional.of(fileType);
             }
         }
         return Optional.empty();
+    }
+
+    private static boolean matchesFileType(File file, FileType fileType) throws IOException {
+        final String fileName = file.getName().toLowerCase();
+        for (String ext:fileType.getExtensions()) {
+            if (fileName.endsWith("." + ext)) {
+                if (fileType.getMinSize()!=null || fileType.getMaxSize()!=null) {
+                    BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+                    long size = attr.size();
+
+                    if ((fileType.getMinSize()!=null && fileType.getMinSize().compareTo(size)>0)
+                        || (fileType.getMaxSize()!=null && fileType.getMaxSize().compareTo(size)<0)) {
+                        return false;
+                    }
+
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private static Date readCreationDateFromExifMetadata(File file) throws ImageProcessingException, IOException {
