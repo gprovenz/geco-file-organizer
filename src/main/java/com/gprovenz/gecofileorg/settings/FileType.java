@@ -15,7 +15,11 @@ public class FileType {
     private boolean readExifMetadata;
 
     private boolean ignore;
+
+    @JsonProperty("min_size")
     private FileSize minSize;
+
+    @JsonProperty("max_size")
     private FileSize maxSize;
 
     public List<String> getExtensions() {

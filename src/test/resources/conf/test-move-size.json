@@ -9,8 +9,21 @@
   "file_types": [
     {
       "file_type": "Photos",
-      "extensions": ["jpg", "jpeg", "raw", "cr2", "gif", "bmp", "psd", "tiff", "tif", "png"],
-      "read_exif_metadata": true
+      "extensions": ["jpg", "jpeg", "raw", "cr2", "psd", "tiff", "tif", "png"],
+      "read_exif_metadata": true,
+      "min_size": {
+        "size": 100,
+        "unit": "KB"
+      }
+    },
+    {
+      "file_type": "Images",
+      "extensions": ["jpg", "jpeg", "bmp", "psd", "tiff", "tif", "png"],
+      "read_exif_metadata": true,
+      "max_size": {
+        "size": 100,
+        "unit": "KB"
+      }
     },
     {
       "file_type": "Videos",

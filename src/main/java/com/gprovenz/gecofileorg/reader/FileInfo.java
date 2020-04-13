@@ -124,9 +124,9 @@ public class FileInfo {
                         || (fileType.getMaxSize()!=null && fileType.getMaxSize().compareTo(size)<0)) {
                         return false;
                     }
-
-                    return true;
                 }
+
+                return true;
             }
         }
         return false;

@@ -25,14 +25,6 @@ public class FileSize implements Comparable<Number>{
     @JsonProperty("unit")
     private Unit unit;
 
-    public double getSize() {
-        return size;
-    }
-
-    public Unit getUnit() {
-        return unit;
-    }
-
     @Override
     public int compareTo(Number value) {
         if (unit==null) {
@@ -40,5 +32,21 @@ public class FileSize implements Comparable<Number>{
         } else {
             return new Double(size * unit.mult).compareTo(value.doubleValue());
         }
+    }
+
+    public double getSize() {
+        return size;
+    }
+
+    public void setSize(double size) {
+        this.size = size;
+    }
+
+    public Unit getUnit() {
+        return unit;
+    }
+
+    public void setUnit(Unit unit) {
+        this.unit = unit;
     }
 }

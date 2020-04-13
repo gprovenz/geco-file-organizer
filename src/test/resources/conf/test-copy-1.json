@@ -7,12 +7,12 @@
   "locale": "en-us",
   "file_types": [
     {
-      "file_type": "Photo",
+      "file_type": "Photos",
       "extensions": ["jpg", "jpeg", "raw", "cr2", "gif", "bmp", "psd", "tiff", "tif", "png"],
       "read_exif_metadata": true
     },
     {
-      "file_type": "Video",
+      "file_type": "Videos",
       "extensions": ["mpg", "mpeg", "mkv", "mp4", "avi", "vid", "mov", "3gp", "asf"]
     },
     {
