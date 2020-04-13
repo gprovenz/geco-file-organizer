@@ -2,7 +2,7 @@
   "operation": "MOVE",
   "source_path": "/my-document-folder",
   "destination_path": "/my-destination-folder",
-  "destination_path_structure": "${file_type}/${year}/${month}-${month_name}-${year}/${day}-${month_name_short}-${year}",
+  "destination_path_structure": "${file_type}/${year}",
   "remove_duplicates": "true",
   "remove_empty_folders": "true",
   "locale": "en-us",
@@ -12,8 +12,8 @@
       "extensions": ["jpg", "jpeg", "raw", "cr2", "psd", "tiff", "tif", "png"],
       "read_exif_metadata": true,
       "min_size": {
-        "size": 100,
-        "unit": "KB"
+        "size": 1,
+        "unit": "MB"
       }
     },
     {
@@ -21,8 +21,8 @@
       "extensions": ["jpg", "jpeg", "bmp", "psd", "tiff", "tif", "png"],
       "read_exif_metadata": true,
       "max_size": {
-        "size": 100,
-        "unit": "KB"
+        "size": 1,
+        "unit": "MB"
       }
     },
     {
