@@ -47,8 +47,14 @@ public class FileTools {
         Optional<FileInfo> source = FileInfo.getInstance(settings, sourceFile);
         Optional<FileInfo> dest = FileInfo.getInstance(settings, destFile);
         if(source.isPresent() && dest.isPresent() && source.get().potentiallySameFile(dest.get())) {
-            // they seem the same file. Checking for content:
-            return FileUtils.contentEquals(sourceFile, destFile);
+            switch (settings.getCompareMode()) {
+                case CONTENT:
+                    // they seem the same file. Checking for content:
+                    return FileUtils.contentEquals(sourceFile, destFile);
+                default:
+                    // they seem the same file. Checking for last modified date:
+                    return source.get().getLastModifiedDate().equals(dest.get().getLastModifiedDate());
+            }
         } else {
             return false;
         }

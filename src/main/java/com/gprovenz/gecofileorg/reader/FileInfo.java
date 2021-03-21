@@ -26,6 +26,11 @@ public class FileInfo {
     private String fileName;
     private long size;
     private Date creationDate;
+
+    public Date getLastModifiedDate() {
+        return lastModifiedDate;
+    }
+
     private Date lastModifiedDate;
     private Optional<FileType> fileType;
 

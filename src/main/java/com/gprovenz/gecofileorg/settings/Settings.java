@@ -30,6 +30,9 @@ public class Settings {
     @JsonProperty("on_existing_file_action")
     private Options.OnExistingFileAction onExistingFileAction;
 
+    @JsonProperty("compare_mode")
+    private Options.CompareMode compareMode;
+
     @JsonProperty("locale")
     private Locale locale;
 
@@ -103,5 +106,13 @@ public class Settings {
 
     public void setLocale(Locale locale) {
         this.locale = locale;
+    }
+
+    public Options.CompareMode getCompareMode() {
+        return compareMode==null ? Options.CompareMode.DATE : compareMode;
+    }
+
+    public void setCompareMode(Options.CompareMode compareMode) {
+        this.compareMode = compareMode;
     }
 }
