@@ -7,8 +7,8 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.gprovenz.gecofileorg.settings.FileType;
 import com.gprovenz.gecofileorg.settings.Settings;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -21,7 +21,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class FileInfo {
-    private static Logger logger = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(FileInfo.class);
 
     private String fileName;
     private long size;

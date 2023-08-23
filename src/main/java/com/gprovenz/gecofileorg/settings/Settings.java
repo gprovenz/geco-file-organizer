@@ -109,7 +109,7 @@ public class Settings {
     }
 
     public Options.CompareMode getCompareMode() {
-        return compareMode==null ? Options.CompareMode.DATE : compareMode;
+        return compareMode==null ? Options.CompareMode.CHECKSUM : compareMode;
     }
 
     public void setCompareMode(Options.CompareMode compareMode) {

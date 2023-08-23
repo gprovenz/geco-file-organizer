@@ -5,12 +5,12 @@ import com.gprovenz.gecofileorg.settings.Settings;
 import com.gprovenz.gecofileorg.settings.SettingsReader;
 import com.gprovenz.gecofileorg.utils.DirectoryTree;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FileMoverTest {
     private static final List<String> files = new ArrayList<>();
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(FileMoverTest.class);
     private File tempDir;
     private File sourceDir;
     private File destDir;

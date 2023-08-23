@@ -5,6 +5,6 @@ public interface Options {
 
     enum Operation {MOVE, COPY}
 
-    enum CompareMode {CONTENT, DATE}
+    enum CompareMode {CONTENT, DATE, CHECKSUM}
 
 }

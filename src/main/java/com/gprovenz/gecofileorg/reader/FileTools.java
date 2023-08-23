@@ -2,8 +2,8 @@ package com.gprovenz.gecofileorg.reader;
 
 import com.gprovenz.gecofileorg.settings.Settings;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,7 +15,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class FileTools {
-    private static Logger logger = LogManager.getLogger();
+    private static final Logger logger = LoggerFactory.getLogger(FileTools.class);
 
     public static boolean isToIgnore(FileInfo fileInfo) {
         return  !fileInfo.getFileType().isPresent() ||
@@ -51,9 +51,15 @@ public class FileTools {
                 case CONTENT:
                     // they seem the same file. Checking for content:
                     return FileUtils.contentEquals(sourceFile, destFile);
-                default:
+                case DATE:
                     // they seem the same file. Checking for last modified date:
                     return source.get().getLastModifiedDate().equals(dest.get().getLastModifiedDate());
+                case CHECKSUM:
+                default:
+                    // they seem the same file. Checking for checksum
+                    long chkSource = FileUtils.checksumCRC32(sourceFile);
+                    long chkDest = FileUtils.checksumCRC32(destFile);
+                    return chkSource == chkDest;
             }
         } else {
             return false;
