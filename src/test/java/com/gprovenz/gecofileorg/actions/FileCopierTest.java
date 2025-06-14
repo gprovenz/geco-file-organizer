@@ -9,19 +9,20 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static com.gprovenz.gecofileorg.utils.DirectoryTree.denyWriteAccess;
 import static org.apache.commons.io.FileUtils.copyFileToDirectory;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class FileCopierTest {
     private static final List<String> files = new ArrayList<>();
@@ -43,11 +44,11 @@ class FileCopierTest {
     }
 
     @BeforeEach
-    public void initEachTest() throws IOException {
+    public void initEachTest(@TempDir File tempDir) throws IOException {
         ClassLoader classLoader = FileCopierTest.class.getClassLoader();
 
-        tempDir = Files.createTempDirectory("testCopy").toFile();
         logger.info("Created temp directory: {}", tempDir);
+        this.tempDir = tempDir;
 
         sourceDir = new File(tempDir, "source");
         assertTrue(sourceDir.mkdirs());
@@ -111,6 +112,33 @@ class FileCopierTest {
     }
 
     @Test
+    public void givenUnwritableFolderThenExit() throws IOException {
+        assertTrue(destDir.mkdirs());
+        denyWriteAccess(Path.of(destDir.getAbsolutePath()));
+
+        try {
+            CommandLineApp.execCommand(settings);
+        } catch (IOException e) {
+            return; // Expected exception due to unwritable destination folder
+        } finally {
+            String tree = DirectoryTree.getTree(tempDir);
+
+            assertEquals("+--" + tempDir.getName() + "\n" +
+                    "|  +--dest\n" +
+                    "|  +--source\n" +
+                    "|  |  +--IMG_1.JPG\n" +
+                    "|  |  +--IMG_2.JPG\n" +
+                    "|  |  +--IMG_3.JPG\n" +
+                    "|  |  +--IMG_4.JPG\n" +
+                    "|  |  +--IMG_5.JPG\n" +
+                    "|  |  +--doc_1.txt\n" +
+                    "|  |  +--doc_2.txt\n", tree);
+            System.out.println("File not copied and source directory untouched: \n" + tree);
+        }
+        fail("Expected an IOException due to unwritable destination folder, but none was thrown.");
+    }
+
+    @Test
     public void givenDuplicateFilesThenCopied() throws IOException {
         // create 2 duplicate files
         File subfolder = new File(sourceDir, "duplicates");
@@ -152,6 +180,9 @@ class FileCopierTest {
                         "|  |  +--doc_1.txt\n" +
                         "|  |  +--doc_2.txt\n", tree);
     }
+
+
+
 
 
 }

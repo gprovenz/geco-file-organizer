@@ -43,10 +43,22 @@ public class FileMover {
         File outPath = new File (settings.getDestinationPath());
         logger.info("Moving files...");
 
-        Files.walk(Paths.get(settings.getSourcePath()))
-                .map(Path::toFile)
-                .filter(File::isFile)
-                .forEach(f -> moveFile(settings, f, outPath, executor, futures));
+        try {
+
+            Files.walk(Paths.get(settings.getSourcePath()))
+                    .map(Path::toFile)
+                    .filter(File::isFile)
+                    .forEach(f -> {
+                        try {
+                            moveFile(settings, f, outPath, executor, futures);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+        } catch (RuntimeException e) {
+            logger.error("Error while moving files", e);
+            throw new IOException(e);
+        }
 
         logger.debug("Cleaning up...");
         for (Future<Boolean> f:futures) {
@@ -66,7 +78,7 @@ public class FileMover {
         logger.info("{} files moved successfully", moved);
     }
 
-    private void moveFile(Settings settings, File sourceFile, File destinationPath, ExecutorService executor, List<Future<Boolean>> futures) {
+    private void moveFile(Settings settings, File sourceFile, File destinationPath, ExecutorService executor, List<Future<Boolean>> futures) throws IOException {
         Optional<FileInfo> fileInfo;
         try {
             fileInfo = FileInfo.getInstance(settings, sourceFile);
@@ -102,7 +114,7 @@ public class FileMover {
                 logMoved(sourceFile, destFile);
             } catch (IOException e) {
                 logger.error("Error moving file " + sourceFile.getAbsolutePath() + " to " + destinationPath, e);
-                return;
+                throw e;
             }
             logger.debug("File {} moved to {}", sourceFile.getName(), destFile.getAbsolutePath());
             moved++;

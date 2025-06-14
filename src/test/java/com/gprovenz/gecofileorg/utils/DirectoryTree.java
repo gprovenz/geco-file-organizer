@@ -1,6 +1,10 @@
 package com.gprovenz.gecofileorg.utils;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.*;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -57,5 +61,47 @@ public class DirectoryTree {
             sb.append("|  ");
         }
         return sb.toString();
+    }
+
+    /**
+     * Denies write access to the "Users" group for the given folder.
+     * @param folderPath The path to the folder to protect.
+     * @throws IOException If an I/O error occurs or ACLs are unsupported.
+     */
+    public static void denyWriteAccess(Path folderPath) throws IOException {
+        // Ensure the folder exists
+        if (!Files.exists(folderPath) || !Files.isDirectory(folderPath)) {
+            throw new IllegalArgumentException("Path must be an existing directory: " + folderPath);
+        }
+
+        // Get ACL view
+        AclFileAttributeView aclView = Files.getFileAttributeView(folderPath, AclFileAttributeView.class);
+        if (aclView == null) {
+            throw new UnsupportedOperationException("ACL view not supported on this file system.");
+        }
+
+        // Lookup "Users" group (can change to a specific user)
+        UserPrincipalLookupService lookupService = folderPath.getFileSystem().getUserPrincipalLookupService();
+        UserPrincipal usersGroup = lookupService.lookupPrincipalByName("Users");
+
+        // Create a DENY ACL entry for write permissions
+        AclEntry denyWriteEntry = AclEntry.newBuilder()
+                .setType(AclEntryType.DENY)
+                .setPrincipal(usersGroup)
+                .setPermissions(
+                        AclEntryPermission.WRITE_DATA,
+                        AclEntryPermission.APPEND_DATA,
+                        AclEntryPermission.WRITE_ATTRIBUTES,
+                        AclEntryPermission.WRITE_ACL,
+                        AclEntryPermission.WRITE_OWNER
+                )
+                .build();
+
+        // Get and update the ACL list
+        List<AclEntry> aclList = aclView.getAcl();
+        aclList.add(0, denyWriteEntry); // Add at beginning to ensure DENY precedence
+        aclView.setAcl(aclList);
+
+        System.out.println("Write access denied for 'Users' to folder: " + folderPath);
     }
 }

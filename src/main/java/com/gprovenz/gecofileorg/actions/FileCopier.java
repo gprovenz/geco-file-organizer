@@ -34,15 +34,26 @@ public class FileCopier {
         File outPath = new File (settings.getDestinationPath());
         logger.info("Coping files...");
 
-        Files.walk(Paths.get(settings.getSourcePath()))
-                .map(Path::toFile)
-                .filter(File::isFile)
-                .forEach(f -> copyFile(settings, f, outPath));
+        try {
+            Files.walk(Paths.get(settings.getSourcePath()))
+                    .map(Path::toFile)
+                    .filter(File::isFile)
+                    .forEach(f -> {
+                        try {
+                            copyFile(settings, f, outPath);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+        } catch (RuntimeException e) {
+            logger.error("Error while coping files", e);
+            throw new IOException(e);
+        }
 
         logger.info("Copied {} files successfully", copied);
     }
 
-    private void copyFile(Settings settings, File sourceFile, File destinationPath) {
+    private void copyFile(Settings settings, File sourceFile, File destinationPath) throws IOException {
         Optional<FileInfo> fileInfo;
         try {
             fileInfo = FileInfo.getInstance(settings, sourceFile);
@@ -76,7 +87,7 @@ public class FileCopier {
                 logCopied(sourceFile, destFile);
             } catch (IOException e) {
                 logger.error("Error copying file " + sourceFile.getAbsolutePath() + " to " + destinationPath, e);
-                return;
+                throw e;
             }
             logCopied(sourceFile, destFile);
             copied++;

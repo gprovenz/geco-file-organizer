@@ -123,10 +123,9 @@ public class FileInfo {
             if (fileName.endsWith("." + ext)) {
                 if (fileType.getMinSize()!=null || fileType.getMaxSize()!=null) {
                     BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
-                    long size = attr.size();
+                    long fileSize = attr.size();
 
-                    if ((fileType.getMinSize()!=null && fileType.getMinSize().compareTo(size)>0)
-                        || (fileType.getMaxSize()!=null && fileType.getMaxSize().compareTo(size)<0)) {
+                    if (!sizeWithinRange(fileSize, fileType)) {
                         return false;
                     }
                 }
@@ -137,9 +136,15 @@ public class FileInfo {
         return false;
     }
 
+    private static boolean sizeWithinRange(long fileSize, FileType fileType) {
+        return (fileType.getMinSize() != null && fileType.getMinSize().compareTo(fileSize) <= 0)
+                || (fileType.getMaxSize() != null && fileType.getMaxSize().compareTo(fileSize) > 0);
+    }
+
     private static Date readCreationDateFromExifMetadata(File file) throws ImageProcessingException, IOException {
         final Metadata metadata = ImageMetadataReader.readMetadata(file);
-        final Directory directory = metadata.getDirectory(ExifSubIFDDirectory.class);
+
+        final Directory directory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
         if (directory != null) {
             return directory.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
         }

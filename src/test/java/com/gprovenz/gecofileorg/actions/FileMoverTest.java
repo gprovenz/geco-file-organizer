@@ -9,19 +9,19 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static com.gprovenz.gecofileorg.utils.DirectoryTree.denyWriteAccess;
 import static org.apache.commons.io.FileUtils.copyFileToDirectory;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class FileMoverTest {
     private static final List<String> files = new ArrayList<>();
@@ -43,10 +43,10 @@ class FileMoverTest {
     }
 
     @BeforeEach
-    public void initEachTest() throws IOException {
+    public void initEachTest(@TempDir File tempDir) throws IOException {
         ClassLoader classLoader = FileMoverTest.class.getClassLoader();
 
-        tempDir = Files.createTempDirectory("testCopy").toFile();
+        this.tempDir = tempDir;
         logger.info("Created temp directory: {}", tempDir);
 
         sourceDir = new File(tempDir, "source");
@@ -107,6 +107,75 @@ class FileMoverTest {
                 "|  |  +--doc_2.txt\n", tree);
 
 
+    }
+
+    @Test
+    public void givenUnwritableDestinationThenExit() throws IOException {
+        loadSettingsFile("conf/test-move-1.json");
+
+        File photos = new File(destDir, "Photos");
+        File photos2017 = new File(photos, "2017");
+        File photos2017Aug = new File(photos2017, "08-August-2017");
+        File photos2017Aug11 = new File(photos2017Aug, "11-Aug-2017");
+
+        assertTrue(photos2017Aug11.mkdirs());
+
+        denyWriteAccess(photos2017Aug11.toPath());
+        denyWriteAccess(photos2017Aug.toPath());
+        denyWriteAccess(photos2017.toPath());
+        denyWriteAccess(photos.toPath());
+        denyWriteAccess(destDir.toPath());
+
+        try {
+            CommandLineApp.execCommand(settings);
+        } catch (IOException e) {
+            return; // Expected exception due to unwritable destination folder
+        } finally {
+            String tree = DirectoryTree.getTree(tempDir);
+            assertEquals("+--" + tempDir.getName() + "\n" +
+                    "|  +--dest\n" +
+                    "|  |  +--Photos\n" +
+                    "|  |  |  +--2017\n" +
+                    "|  |  |  |  +--08-August-2017\n" +
+                    "|  |  |  |  |  +--11-Aug-2017\n" +
+                    "|  +--source\n" +
+                    "|  |  +--IMG_1.JPG\n" +
+                    "|  |  +--IMG_2.JPG\n" +
+                    "|  |  +--IMG_3.JPG\n" +
+                    "|  |  +--IMG_4.JPG\n" +
+                    "|  |  +--IMG_5.JPG\n" +
+                    "|  |  +--doc_1.txt\n" +
+                    "|  |  +--doc_2.txt\n", tree);
+            System.out.println("Files not moved and source directory untouched: \n" + tree);
+        }
+        fail("Expected an IOException due to unwritable destination folder, but none was thrown.");
+    }
+
+    @Test
+    public void givenUnwritableDestinationWithExistingPathThenExit() throws IOException {
+        loadSettingsFile("conf/test-move-1.json");
+        assertTrue(destDir.mkdirs());
+        denyWriteAccess(destDir.toPath());
+
+        try {
+            CommandLineApp.execCommand(settings);
+        } catch (IOException e) {
+            return; // Expected exception due to unwritable destination folder
+        } finally {
+            String tree = DirectoryTree.getTree(tempDir);
+            assertEquals("+--" + tempDir.getName() + "\n" +
+                    "|  +--dest\n" +
+                    "|  +--source\n" +
+                    "|  |  +--IMG_1.JPG\n" +
+                    "|  |  +--IMG_2.JPG\n" +
+                    "|  |  +--IMG_3.JPG\n" +
+                    "|  |  +--IMG_4.JPG\n" +
+                    "|  |  +--IMG_5.JPG\n" +
+                    "|  |  +--doc_1.txt\n" +
+                    "|  |  +--doc_2.txt\n", tree);
+            System.out.println("File not moved and source directory untouched: \n" + tree);
+        }
+        fail("Expected an IOException due to unwritable destination folder, but none was thrown.");
     }
 
     @Test
@@ -234,13 +303,12 @@ class FileMoverTest {
         assertEquals("+--" + tempDir.getName() + "\n" +
                 "|  +--dest\n" +
                 "|  |  +--Images\n" +
-                "|  |  |  +--2017\n" +
-                "|  |  |  |  +--IMG_2.JPG\n" +
                 "|  |  |  +--2018\n" +
                 "|  |  |  |  +--IMG_5.JPG\n" +
                 "|  |  +--Photos\n" +
                 "|  |  |  +--2017\n" +
                 "|  |  |  |  +--IMG_1.JPG\n" +
+                "|  |  |  |  +--IMG_2.JPG\n" +
                 "|  |  |  |  +--IMG_3.JPG\n" +
                 "|  |  |  +--2018\n" +
                 "|  |  |  |  +--IMG_4.JPG\n" +
